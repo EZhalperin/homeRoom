@@ -2,7 +2,7 @@ import express from "express"
 import cors from "cors"
 import cookieParser from "cookie-parser";
 
-import { app } from "./server";
+import {app} from "./server.js";
 
 import authRoutes from "./routes/auth.routes.js";
 import adminUsersRoutes from "./routes/admin.users.routes.js";

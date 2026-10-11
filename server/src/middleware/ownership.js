@@ -1,73 +1,34 @@
-import { Class } from "../models/Class.js";
-import { AppError } from "../utils/AppError.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
+import {
+  assertTeacherOwnsClass,
+  resolveParentStudent,
+  resolveTeacherStudent,
+} from "../services/studentService.js";
 
 /**
- * @param {import("mongoose").Document} classDoc
- * @param {string} studentUuid
+ * Thin wrappers around the ownership rules in studentService.
+ * They set req.ownedClass / req.ownedStudent (plain objects).
+ * Services re-check ownership themselves (defense in depth).
  */
-function studentFromClass(classDoc, studentUuid) {
-  return classDoc.students.find((student) => student.id === studentUuid);
-}
 
-/**
- * Class `:id` must belong to the authenticated teacher.
- * @type {import("express").RequestHandler}
- */
+/** Class `:id` must belong to the authenticated teacher. */
 export const teacherOwnsClass = asyncHandler(async (req, res, next) => {
-  const classDoc = await Class.findById(req.params.id);
-  if (!classDoc) {
-    throw new AppError("Class not found", 404);
-  }
-  if (classDoc.teacherId !== req.user.userId) {
-    throw new AppError("Forbidden", 403);
-  }
-  req.ownedClass = classDoc;
+  req.ownedClass = await assertTeacherOwnsClass(req.user.userId, req.params.id);
   next();
 });
 
-/**
- * Student `:id` (uuid) must be in the authenticated teacher's ACTIVE class.
- * @type {import("express").RequestHandler}
- */
+/** Student `:id` (uuid) must be in the teacher's ACTIVE class. */
 export const teacherOwnsStudent = asyncHandler(async (req, res, next) => {
-  const classDoc = await Class.findOne({
-    isActive: true,
-    teacherId: req.user.userId,
-    "students.id": req.params.id,
-  });
-  if (!classDoc) {
-    throw new AppError("Student not found", 404);
-  }
-  const student = studentFromClass(classDoc, req.params.id);
-  if (!student) {
-    throw new AppError("Student not found", 404);
-  }
-  req.ownedClass = classDoc;
-  req.ownedStudent = student;
+  const found = await resolveTeacherStudent(req.user.userId, req.params.id);
+  req.ownedClass = { _id: found.classId, className: found.className, teacherId: found.teacherId };
+  req.ownedStudent = found.student;
   next();
 });
 
-/**
- * Student `:id` (uuid) must have `studentId` equal to the parent's login userId.
- * @type {import("express").RequestHandler}
- */
+/** Student `:id` (uuid) must have studentId equal to the parent's login userId. */
 export const parentOwnsStudent = asyncHandler(async (req, res, next) => {
-  const classDoc = await Class.findOne({
-    isActive: true,
-    "students.id": req.params.id,
-  });
-  if (!classDoc) {
-    throw new AppError("Student not found", 404);
-  }
-  const student = studentFromClass(classDoc, req.params.id);
-  if (!student) {
-    throw new AppError("Student not found", 404);
-  }
-  if (student.studentId !== req.user.userId) {
-    throw new AppError("Forbidden", 403);
-  }
-  req.ownedClass = classDoc;
-  req.ownedStudent = student;
+  const found = await resolveParentStudent(req.user.userId, req.params.id);
+  req.ownedClass = { _id: found.classId, className: found.className, teacherId: found.teacherId };
+  req.ownedStudent = found.student;
   next();
 });
