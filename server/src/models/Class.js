@@ -1,58 +1,86 @@
-import mongoose from "mongoose";
+import { randomUUID } from "node:crypto";
 
-const gradeSchema = new mongoose.Schema(
-  {
-    subject: { type: String, required: true },
-    taskName: { type: String, required: true },
-    score: { type: Number, required: true, min: 0, max: 100 },
-    weight: { type: Number, required: true, min: 0, max: 1 },
-    date: { type: Date, required: true },
-  },
-  { _id: false },
-);
+/**
+ * Document shapes for the `classes` collection (native driver, no schemas).
+ * Validation lives in the Zod validators.
+ * @module models/Class
+ */
 
-const attendanceSchema = new mongoose.Schema(
-  {
-    date: { type: Date, required: true },
-    type: { type: String, required: true, enum: ["absence", "late"] },
-  },
-  { _id: false },
-);
+export const COLLECTION = "classes";
+export const ATTENDANCE_TYPES = Object.freeze(["absence", "late"]);
 
-const formSchema = new mongoose.Schema(
-  {
-    title: { type: String, required: true },
-    description: { type: String, required: true },
-    deadline: { type: Date, required: true },
-    isApproved: { type: Boolean, default: false },
-  },
-  { _id: false },
-);
+/**
+ * @typedef {Object} Grade
+ * @property {string} subject
+ * @property {string} taskName
+ * @property {number} score        0..100
+ * @property {number} weight       0.0..1.0
+ * @property {Date} date
+ *
+ * @typedef {Object} Attendance
+ * @property {Date} date
+ * @property {"absence"|"late"} type
+ *
+ * @typedef {Object} Form
+ * @property {string} title
+ * @property {string} description
+ * @property {Date} deadline
+ * @property {boolean} isApproved
+ *
+ * @typedef {Object} Student
+ * @property {string} id           uuid
+ * @property {string} studentId    national ID
+ * @property {string} firstName
+ * @property {string} lastName
+ * @property {number} academicRiskIndex  0..10
+ * @property {Grade[]} grades
+ * @property {Attendance[]} attendance
+ * @property {Form[]} forms
+ *
+ * @typedef {Object} ClassDoc
+ * @property {import("mongodb").ObjectId} [_id]
+ * @property {string} teacherId
+ * @property {string} className
+ * @property {Student[]} students
+ * @property {boolean} isActive
+ */
 
-const studentSchema = new mongoose.Schema(
-  {
-    id: { type: String, required: true },
-    studentId: { type: String, required: true },
-    firstName: { type: String, required: true },
-    lastName: { type: String, required: true },
-    academicRiskIndex: { type: Number, default: 0, min: 0, max: 10 },
-    grades: { type: [gradeSchema], default: [] },
-    attendance: { type: [attendanceSchema], default: [] },
-    forms: { type: [formSchema], default: [] },
-  },
-  { _id: false },
-);
+/** @returns {ClassDoc} */
+export function buildClassDoc({ teacherId, className }) {
+  return { teacherId, className, students: [], isActive: true };
+}
 
-const classSchema = new mongoose.Schema({
-  teacherId: { type: String, required: true },
-  className: { type: String, required: true },
-  students: { type: [studentSchema], default: [] },
-  isActive: { type: Boolean, default: true },
-});
+/** @returns {Student} */
+export function buildStudentDoc({ studentId, firstName, lastName }) {
+  return {
+    id: randomUUID(),
+    studentId,
+    firstName,
+    lastName,
+    academicRiskIndex: 0,
+    grades: [],
+    attendance: [],
+    forms: [],
+  };
+}
 
-classSchema.index({ teacherId: 1, isActive: 1 });
-classSchema.index({ "students.id": 1 });
-classSchema.index({ "students.studentId": 1 });
+/** @returns {Grade} */
+export function buildGradeDoc({ subject, taskName, score, weight, date }) {
+  return {
+    subject,
+    taskName,
+    score: Number(score),
+    weight: Number(weight),
+    date: new Date(date),
+  };
+}
 
-export const Class = mongoose.model("Class", classSchema);
-export default Class;
+/** @returns {Attendance} */
+export function buildAttendanceDoc({ date, type }) {
+  return { date: new Date(date), type };
+}
+
+/** @returns {Form} */
+export function buildFormDoc({ title, description, deadline }) {
+  return { title, description, deadline: new Date(deadline), isApproved: false };
+}
