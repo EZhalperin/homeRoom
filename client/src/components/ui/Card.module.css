@@ -1,0 +1,5 @@
+.card {
+  background: var(--color-surface); border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm); padding: var(--space-4);
+}
+.header { display: flex; justify-content: space-between; align-items: center; gap: var(--space-3); margin-block-end: var(--space-3); }

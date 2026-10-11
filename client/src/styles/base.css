@@ -1,0 +1,17 @@
+*, *::before, *::after { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0; font-family: var(--font-body); font-size: var(--fs-md);
+  line-height: var(--lh-body); color: var(--color-text); background: var(--color-bg);
+}
+h1, h2, h3, p { margin: 0; }
+h1 { font-size: var(--fs-xl); }
+h2 { font-size: var(--fs-lg); }
+a { color: var(--color-primary); }
+img, svg { max-width: 100%; }
+button, input, select, textarea { font: inherit; color: inherit; }
+:focus-visible { outline: 3px solid var(--color-primary); outline-offset: 2px; }
+
+@media (prefers-reduced-motion: reduce) {
+  * { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+}

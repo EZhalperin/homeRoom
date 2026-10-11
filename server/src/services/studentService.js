@@ -38,9 +38,12 @@ export async function resolveTeacherStudent(teacherUserId, studentUuid) {
  * Ownership: the student's national ID must equal the parent's login userId.
  */
 export async function resolveParentStudent(parentUserId, studentUuid) {
-  const found = await studentRepository.findStudentByUuid(studentUuid, { activeOnly: true });
+  const found = await studentRepository.findStudentByUuid(studentUuid, {
+    activeOnly: true,
+  });
   if (!found) throw new AppError("Student not found", 404);
-  if (found.student.studentId !== parentUserId) throw new AppError("Forbidden", 403);
+  if (found.student.studentId !== parentUserId)
+    throw new AppError("Forbidden", 403);
   return found;
 }
 
@@ -60,7 +63,8 @@ export async function listStudentsOfClass(teacherUserId, classId) {
 }
 
 export async function getMyChild(parentUserId) {
-  const found = await studentRepository.findActiveStudentByStudentId(parentUserId);
+  const found =
+    await studentRepository.findActiveStudentByStudentId(parentUserId);
   if (!found) throw new AppError("Student not found", 404);
   const { student } = found;
   return {
@@ -69,6 +73,7 @@ export async function getMyChild(parentUserId) {
     grades: student.grades,
     forms: student.forms,
     attendance: student.attendance,
+    id: student.id,
     weightedAverages: weightedAverage(student.grades),
   };
 }

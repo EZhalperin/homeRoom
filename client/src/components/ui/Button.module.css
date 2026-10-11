@@ -1,0 +1,13 @@
+.btn {
+  min-height: var(--tap-target); padding-inline: var(--space-4);
+  border: 1px solid transparent; border-radius: var(--radius-sm);
+  font-weight: 500; cursor: pointer; transition: background 0.15s;
+}
+.btn:disabled { opacity: 0.55; cursor: not-allowed; }
+.primary { background: var(--color-primary); color: #fff; }
+.primary:hover:not(:disabled) { background: var(--color-primary-hover); }
+.secondary { background: var(--color-surface); border-color: var(--color-border); }
+.secondary:hover:not(:disabled) { background: var(--color-primary-soft); }
+.danger { background: var(--color-danger); color: #fff; }
+.ghost { background: transparent; color: var(--color-text-muted); }
+.ghost:hover:not(:disabled) { background: var(--color-primary-soft); }
