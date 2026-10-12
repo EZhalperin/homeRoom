@@ -23,9 +23,9 @@ export async function connectMongo() {
 }
 
 /** @returns {import("mongodb").Db} */
-export function getDb() {
+export async function getDb() {
   if (!db) {
-    throw new Error("MongoDB is not connected. Call connectMongo() before using the database.");
+    await connectMongo()
   }
   return db;
 }
@@ -34,8 +34,9 @@ export function getDb() {
  * @param {string} name
  * @returns {import("mongodb").Collection}
  */
-export function getCollection(name) {
-  return getDb().collection(name);
+export async function getCollection(name) {
+  const database = await getDb()
+  return database.collection(name);
 }
 
 /** Closes the client (graceful shutdown). */
@@ -55,7 +56,7 @@ const IGNORABLE_DROP_CODES = new Set([26, 27]);
  * Creates the indexes the app relies on. Safe to call on every boot.
  */
 export async function ensureIndexes() {
-  const classes = getCollection(COLLECTION);
+  const classes = await getCollection(COLLECTION);
 
   // Legacy non-unique index created by the old Mongoose schema; it conflicts
   // with the new unique partial index on the same key pattern.
