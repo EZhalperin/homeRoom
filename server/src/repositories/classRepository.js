@@ -50,7 +50,8 @@ export async function list({ teacherId, className, isActive } = {}) {
   if (className) {
     match.className = { $regex: escapeRegex(className), $options: "i" };
   }
-  const docs = await col()
+  const collection = await col()
+  const docs = await collection
     .aggregate([
       { $match: match },
       { $addFields: { studentsCount: { $size: { $ifNull: ["$students", []] } } } },
