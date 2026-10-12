@@ -33,8 +33,12 @@ export function AuthProvider({ children }) {
     const data = await loginRequest(userId, password);
     tokenStore.set(data.token);
     const next = {
-      id: data.id, userId, role: data.role,
-      firstName: data.firstName, lastName: data.lastName,
+      id: data.id,
+      userId,
+      email: data.email,
+      role: data.role,
+      firstName: data.firstName,
+      lastName: data.lastName,
     };
     setUser(next);
     return next;
