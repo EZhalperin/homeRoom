@@ -4,11 +4,7 @@ import cookieParser from "cookie-parser";
 
 import { app } from "./server.js";
 
-import authRoutes from "./routes/auth.routes.js";
-import adminUsersRoutes from "./routes/admin.users.routes.js";
-import { verifyToken } from "./middleware/authenticate.js";
-import { isAdmin } from "./middleware/authorizeRole.js";
-import usersRoutes from "./routes/users.routes.js";
+import apiRouter from "./routes/index.js"
 
 const PORT = process.env.PORT;
 
@@ -18,9 +14,7 @@ app.use(cors());
 
 app.use(cookieParser());
 
-app.use("/api/auth", authRoutes);
-app.use("/api/users", usersRoutes);
-app.use("/api/admin/users", verifyToken, isAdmin, adminUsersRoutes);
+app.use("/api", apiRouter);
 
 app.listen(PORT, () => {
   console.log(`server is up and listening on port ${PORT}`);
