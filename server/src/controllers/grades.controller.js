@@ -2,10 +2,10 @@ import { asyncHandler } from "../utils/asyncHandler.js";
 import * as gradeRecordService from "../services/gradeRecordService.js";
 
 export const addGrade = asyncHandler(async (req, res) => {
-  const { subject, taskName, score, weight, date } = req.body;
+  const { subject, taskName, score, weight, date } = req.validated.body;
   const result = await gradeRecordService.addGrade({
     teacherUserId: req.user.userId,
-    studentUuid: req.params.id,
+    studentUuid: req.validated.params.id,
     subject,
     taskName,
     score,
@@ -16,10 +16,10 @@ export const addGrade = asyncHandler(async (req, res) => {
 });
 
 export const updateGrade = asyncHandler(async (req, res) => {
-  const { score, subject, date, taskName } = req.body;
+  const { score, subject, date, taskName } = req.validated.body;
   const result = await gradeRecordService.updateGrade({
     teacherUserId: req.user.userId,
-    studentUuid: req.params.id,
+    studentUuid: req.validated.params.id,
     score,
     subject,
     date,

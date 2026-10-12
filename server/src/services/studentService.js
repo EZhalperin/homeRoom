@@ -70,9 +70,9 @@ export async function getMyChild(parentUserId) {
   return {
     firstName: student.firstName,
     lastName: student.lastName,
-    grades: student.grades,
-    forms: student.forms,
-    attendance: student.attendance,
+    grades: student.grades || [],
+    forms: student.forms || [],
+    attendance: student.attendance || [],
     id: student.id,
     weightedAverages: weightedAverage(student.grades),
   };

@@ -2,7 +2,7 @@ export default {
   apps: [
     {
       name: "homeroom-server",
-      script: "src/app.js",
+      script: "src/server.js",
       interpreter: "node",
       node_args: "--env-file=.env",
       autorestart: true,

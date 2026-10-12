@@ -2,13 +2,13 @@ import { asyncHandler } from "../utils/asyncHandler.js";
 import * as classService from "../services/classService.js";
 
 export const createClass = asyncHandler(async (req, res) => {
-  const { teacherId, className } = req.body;
+  const { teacherId, className } = req.validated.body;
   const result = await classService.createClass({ teacherId, className });
   res.status(201).json({ message: "Class created successfully", ...result });
 });
 
 export const listClasses = asyncHandler(async (req, res) => {
-  const { className, isActive } = req.query;
+  const { className, isActive } = req.validated.query;
   res.json(await classService.listClasses(req.user, { className, isActive }));
 });
 
@@ -17,6 +17,6 @@ export const getMyClass = asyncHandler(async (req, res) => {
 });
 
 export const deleteClass = asyncHandler(async (req, res) => {
-  const result = await classService.deleteClass(req.params.id);
+  const result = await classService.deleteClass(req.validated.params.id);
   res.json({ message: "Class deleted successfully", ...result });
 });

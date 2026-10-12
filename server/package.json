@@ -1,28 +1,35 @@
 {
   "name": "server",
   "version": "1.0.0",
-  "description": "",
-  "main": "ecosystem.config.js",
+  "description": "HomeRoom API",
+  "main": "src/server.js",
   "directories": {
     "test": "tests"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "node --watch --env-file=.env src/app.js"
+    "dev": "node --watch --env-file=.env src/server.js",
+    "start": "node --env-file=.env src/server.js",
+    "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js",
+    "seed:admin": "node --env-file=.env scripts/seedAdmin.js"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "type": "module",
+  "jest": {
+    "testEnvironment": "node",
+    "setupFiles": ["<rootDir>/tests/setupEnv.js"]
+  },
   "dependencies": {
+    "@supabase/supabase-js": "^2.89.0",
     "bcrypt": "^6.0.0",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.6",
     "express": "^5.2.1",
     "express-rate-limit": "^8.7.1",
+    "helmet": "^8.1.0",
     "jsonwebtoken": "^9.0.3",
     "mongodb": "^7.7.0",
-    "supabase": "^2.120.0",
     "zod": "^4.6.5"
   },
   "devDependencies": {

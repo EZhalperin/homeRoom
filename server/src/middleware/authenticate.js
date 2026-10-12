@@ -6,7 +6,7 @@ import { findByUserId, toPublicUser, verifyToken as verifyJwt } from "../service
  * Verifies `Authorization: Bearer <jwt>` and re-checks `isActive` in Supabase
  * so a suspended user is blocked immediately.
  *
- * Sets `req.user` to `{ id, userId, role, firstName, lastName, isActive }`.
+ * Sets `req.user` to the public user (`id` is a UUID string).
  *
  * @type {import("express").RequestHandler}
  */

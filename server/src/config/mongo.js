@@ -7,25 +7,58 @@ import { COLLECTION } from "../models/Class.js";
 let client = null;
 /** @type {import("mongodb").Db|null} */
 let db = null;
+/** @type {Promise<import("mongodb").Db>|null} */
+let connecting = null;
+
+function databaseOf(mongoClient) {
+  return env.MONGODB_DB_NAME ? mongoClient.db(env.MONGODB_DB_NAME) : mongoClient.db();
+}
 
 /**
- * Opens the single shared MongoClient (idempotent).
+ * Opens the single shared MongoClient. Concurrent callers share one promise.
+ * On failure, state is reset so a later retry can succeed.
+ *
+ * @param {typeof MongoClient} [ClientCtor]
  * @returns {Promise<import("mongodb").Db>}
  */
-export async function connectMongo() {
+export async function connectMongo(ClientCtor = MongoClient) {
   if (db) return db;
-  client = new MongoClient(env.MONGODB_URI, { serverSelectionTimeoutMS: 10000 });
-  client.on("error", (err) => logger.error("MongoDB client error:", err));
-  await client.connect();
-  db = client.db(env.MONGODB_DB_NAME);
-  logger.info("MongoDB connected");
-  return db;
+  if (!connecting) {
+    connecting = (async () => {
+      const next = new ClientCtor(env.MONGODB_URI, { serverSelectionTimeoutMS: 10000 });
+      try {
+        if (typeof next.on === "function") {
+          next.on("error", (err) => logger.error("MongoDB client error:", err));
+        }
+        await next.connect();
+        client = next;
+        db = databaseOf(next);
+        logger.info("MongoDB connected");
+        return db;
+      } catch (err) {
+        client = null;
+        db = null;
+        try {
+          await next.close();
+        } catch {
+          // close after a failed connect is best-effort
+        }
+        throw err;
+      }
+    })();
+  }
+  try {
+    return await connecting;
+  } catch (err) {
+    connecting = null;
+    throw err;
+  }
 }
 
 /** @returns {import("mongodb").Db} */
-export async function getDb() {
+export function getDb() {
   if (!db) {
-    await connectMongo()
+    throw new Error("MongoDB is not connected. Call connectMongo() first.");
   }
   return db;
 }
@@ -34,39 +67,43 @@ export async function getDb() {
  * @param {string} name
  * @returns {import("mongodb").Collection}
  */
-export async function getCollection(name) {
-  const database = await getDb()
-  return database.collection(name);
+export function getCollection(name) {
+  return getDb().collection(name);
 }
 
-/** Closes the client (graceful shutdown). */
+/** Closes the client (idempotent). */
 export async function closeMongo() {
-  if (client) {
-    await client.close();
-    client = null;
-    db = null;
+  if (connecting) {
+    try {
+      await connecting;
+    } catch {
+      // ignore a failed in-flight connect during shutdown
+    }
+  }
+  const current = client;
+  client = null;
+  db = null;
+  connecting = null;
+  if (current) {
+    await current.close();
     logger.info("MongoDB connection closed");
   }
 }
 
-/** Index 'not found' errors that are safe to ignore when dropping legacy indexes. */
 const IGNORABLE_DROP_CODES = new Set([26, 27]);
 
 /**
  * Creates the indexes the app relies on. Safe to call on every boot.
  */
 export async function ensureIndexes() {
-  const classes = await getCollection(COLLECTION);
+  const classes = getCollection(COLLECTION);
 
-  // Legacy non-unique index created by the old Mongoose schema; it conflicts
-  // with the new unique partial index on the same key pattern.
   try {
     await classes.dropIndex("students.studentId_1");
   } catch (err) {
     if (!IGNORABLE_DROP_CODES.has(err?.code)) throw err;
   }
 
-  // One ACTIVE class per teacher (race-safe).
   await classes.createIndex(
     { teacherId: 1 },
     {
@@ -76,13 +113,8 @@ export async function ensureIndexes() {
     },
   );
 
-  // Lookups by student uuid (default name, same as the old Mongoose index).
   await classes.createIndex({ "students.id": 1 });
 
-  // A studentId may exist in only ONE active class. A multikey unique index
-  // enforces uniqueness across documents (not inside one document's array,
-  // which studentRepository.addStudentToClass guards with a conditional update).
-  // The $exists clause keeps classes with an empty students[] out of the index.
   await classes.createIndex(
     { "students.studentId": 1 },
     {

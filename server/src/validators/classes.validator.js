@@ -1,10 +1,7 @@
 import { z } from "zod";
+import { queryBoolean } from "./common.js";
 
 export const mongoId = z.string().regex(/^[0-9a-fA-F]{24}$/, "Invalid class id");
-
-const booleanQuery = z
-  .enum(["true", "false"])
-  .transform((value) => value === "true");
 
 export const createClassSchema = z.object({
   body: z.object({
@@ -16,7 +13,7 @@ export const createClassSchema = z.object({
 export const listClassesSchema = z.object({
   query: z.object({
     className: z.string().optional(),
-    isActive: booleanQuery.optional(),
+    isActive: queryBoolean.optional(),
     teacherId: z.string().optional(),
   }),
 });

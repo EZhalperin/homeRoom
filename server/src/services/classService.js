@@ -15,7 +15,7 @@ export async function createClass({ teacherId, className }) {
   const existing = await classRepository.findActiveByTeacherId(teacherId);
   if (existing) throw new AppError("Teacher already has an active class", 409);
 
-  await classRepository.create({ teacherId, className }); // unique index covers races
+  await classRepository.create({ teacherId, className });
   return { teacherId, className };
 }
 
@@ -28,7 +28,8 @@ export function listClasses(requestingUser, filters = {}) {
   return classRepository.list({
     className: filters.className,
     isActive: filters.isActive,
-    teacherId: requestingUser.role === "teacher" ? requestingUser.userId : undefined,
+    teacherId:
+      requestingUser.role === "teacher" ? requestingUser.userId : filters.teacherId,
   });
 }
 

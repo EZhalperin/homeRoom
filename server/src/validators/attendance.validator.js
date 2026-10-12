@@ -1,7 +1,8 @@
 import { z } from "zod";
+import { studentUuid } from "./common.js";
 
 const studentParam = z.object({
-  id: z.string().uuid("id must be a UUID"),
+  id: studentUuid,
 });
 
 const attendanceBody = z.object({

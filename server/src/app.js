@@ -1,26 +1,31 @@
 import express from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
+import helmet from "helmet";
+import { env } from "./config/env.js";
+import apiRouter from "./routes/index.js";
+import { errorHandler, notFoundHandler } from "./middleware/errorHandler.js";
 
-import { app } from "./server.js";
+export function createApp() {
+  const app = express();
 
-import apiRouter from "./routes/index.js"
+  if (env.NODE_ENV === "production") {
+    app.set("trust proxy", 1);
+  }
 
-const PORT = process.env.PORT;
+  app.use(helmet());
+  app.use(
+    cors({
+      origin: env.CORS_ORIGIN,
+      credentials: true,
+    }),
+  );
+  app.use(express.json({ limit: "100kb" }));
+  app.use(cookieParser());
+  app.use("/api", apiRouter);
+  app.use(notFoundHandler);
+  app.use(errorHandler);
+  return app;
+}
 
-app.use((req, res, next) => {
-  console.log(req.method, req.url);
-  next()
-})
-
-app.use(express.json());
-
-app.use(cors());
-
-app.use(cookieParser());
-
-app.use("/api", apiRouter);
-
-app.listen(PORT, () => {
-  console.log(`server is up and listening on port ${PORT}`);
-});
+export const app = createApp();

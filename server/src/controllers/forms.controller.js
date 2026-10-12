@@ -2,7 +2,7 @@ import { asyncHandler } from "../utils/asyncHandler.js";
 import * as formService from "../services/formService.js";
 
 export const distributeForm = asyncHandler(async (req, res) => {
-  const { title, description, deadline } = req.body;
+  const { title, description, deadline } = req.validated.body;
   const result = await formService.createForm({
     teacherUserId: req.user.userId,
     title,
@@ -13,7 +13,7 @@ export const distributeForm = asyncHandler(async (req, res) => {
 });
 
 export const updateForm = asyncHandler(async (req, res) => {
-  const { title, deadline, description, newDeadline } = req.body;
+  const { title, deadline, description, newDeadline } = req.validated.body;
   const result = await formService.updateForm({
     teacherUserId: req.user.userId,
     title,
@@ -25,7 +25,7 @@ export const updateForm = asyncHandler(async (req, res) => {
 });
 
 export const approveForm = asyncHandler(async (req, res) => {
-  let title = req.params.title;
+  let title = req.validated.params.title;
   try {
     title = decodeURIComponent(title);
   } catch {
@@ -33,7 +33,7 @@ export const approveForm = asyncHandler(async (req, res) => {
   }
   const result = await formService.approveForm({
     parentUserId: req.user.userId,
-    studentUuid: req.params.id,
+    studentUuid: req.validated.params.id,
     title,
   });
   res.json({ message: "Form approved successfully", ...result });

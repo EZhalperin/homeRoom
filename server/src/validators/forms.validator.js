@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { studentUuid } from "./common.js";
 
 export const createFormSchema = z.object({
   body: z.object({
@@ -16,15 +17,14 @@ export const updateFormSchema = z.object({
       description: z.string().min(1).optional(),
       newDeadline: z.coerce.date().optional(),
     })
-    .refine(
-      (body) => body.description !== undefined || body.newDeadline !== undefined,
-      { message: "description and/or a new deadline is required" },
-    ),
+    .refine((body) => body.description !== undefined || body.newDeadline !== undefined, {
+      message: "description and/or a new deadline is required",
+    }),
 });
 
 export const approveFormSchema = z.object({
   params: z.object({
-    id: z.string().uuid("id must be a UUID"),
+    id: studentUuid,
     title: z.string().min(1, "title is required"),
   }),
 });
