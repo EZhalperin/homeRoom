@@ -68,8 +68,9 @@ export async function addStudentToClass(classId, studentDoc) {
 }
 
 /** Flattens students of all active classes (no grades / attendance). */
-export function listAllStudentsFlattened() {
-  return col()
+export async function listAllStudentsFlattened() {
+  const collection = await col()
+  return collection
     .aggregate([
       { $match: { isActive: true } },
       { $unwind: "$students" },
