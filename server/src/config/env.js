@@ -1,4 +1,11 @@
-﻿import { z } from "zod";
+﻿import path from "node:path";
+import { fileURLToPath } from "node:url";
+import dotenv from "dotenv";
+import { z } from "zod";
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+dotenv.config({ path: path.resolve(__dirname, "../../.env"), quiet: true });
+dotenv.config({ quiet: true });
 
 /**
  * Fail-fast environment validation. Import this module before any other config.

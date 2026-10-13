@@ -11,7 +11,7 @@ export default function AnnouncementForm({ onSubmit, isPending, defaultClassId }
 
   const [title, setTitle] = useState("");
   const [body, setBody] = useState("");
-  const [target, setTarget] = useState(isAdmin ? "all" : "class");
+  const [audienceType, setAudienceType] = useState(isAdmin ? "all" : "classes");
   const [classId, setClassId] = useState(defaultClassId || "");
   const [error, setError] = useState("");
 
@@ -25,19 +25,24 @@ export default function AnnouncementForm({ onSubmit, isPending, defaultClassId }
       setError("נא להזין תוכן להודעה");
       return;
     }
-    if (target === "class" && !classId) {
-      setError("נא להזין מזהה כיתה");
+    if (isAdmin && audienceType === "classes" && !classId.trim()) {
+      setError("נא להזין מזהה כיתה (24 תווים בפורמט Hex)");
       return;
     }
 
     setError("");
+
     const payload = {
       title: title.trim(),
       body: body.trim(),
-      target,
     };
-    if (target === "class") {
-      payload.classId = classId;
+
+    if (isAdmin) {
+      if (audienceType === "all") {
+        payload.audience = { type: "all" };
+      } else if (audienceType === "classes") {
+        payload.audience = { type: "classes", classIds: [classId.trim()] };
+      }
     }
 
     onSubmit(payload, () => {
@@ -57,37 +62,35 @@ export default function AnnouncementForm({ onSubmit, isPending, defaultClassId }
           label="כותרת ההודעה"
           placeholder="לדוגמה: תזכורת ליום הורים"
           value={title}
-          onChange={(e) => setTitle(e.target.value)}
+          onChange={(e) => {
+            setTitle(e.target.value);
+            setError("");
+          }}
           required
         />
 
         {isAdmin ? (
           <Select
             label="קהל יעד"
-            value={target}
-            onChange={(e) => setTarget(e.target.value)}
+            value={audienceType}
+            onChange={(e) => setAudienceType(e.target.value)}
           >
             <option value="all">לכל בית הספר</option>
-            <option value="teachers">למורים בלבד</option>
-            <option value="parents">להורים בלבד</option>
-            <option value="class">לכיתה ספציפית</option>
+            <option value="classes">לכיתה ספציפית</option>
           </Select>
         ) : (
-          <Select
-            label="קהל יעד"
-            value={target}
-            onChange={(e) => setTarget(e.target.value)}
-          >
-            <option value="class">לכיתה שלי</option>
-            <option value="all">לכל בית הספר</option>
-          </Select>
+          <div style={{ display: "flex", flexDirection: "column", justifyContent: "center" }}>
+            <span style={{ fontSize: "var(--fs-sm)", color: "var(--color-text-muted)" }}>
+              קהל יעד: הורי הכיתה שלי
+            </span>
+          </div>
         )}
       </div>
 
-      {target === "class" && !defaultClassId && (
+      {isAdmin && audienceType === "classes" && (
         <Input
-          label="מזהה כיתה"
-          placeholder="מספר או מזהה הכיתה"
+          label="מזהה כיתה (Class ID)"
+          placeholder="לדוגמה: 650000000000000000000001"
           value={classId}
           onChange={(e) => setClassId(e.target.value)}
           required
@@ -100,7 +103,10 @@ export default function AnnouncementForm({ onSubmit, isPending, defaultClassId }
         rows={4}
         placeholder="פרטי ההודעה..."
         value={body}
-        onChange={(e) => setBody(e.target.value)}
+        onChange={(e) => {
+          setBody(e.target.value);
+          setError("");
+        }}
         required
       />
 

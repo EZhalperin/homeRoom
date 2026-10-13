@@ -4,17 +4,17 @@ import { formatDateTime } from "../../utils/formatters.js";
 import { useAuth } from "../../hooks/useAuth.js";
 import styles from "./AnnouncementCard.module.css";
 
-const TARGET_LABELS = {
+const AUDIENCE_LABELS = {
   all: { label: "לכל בית הספר", tone: "info" },
-  teachers: { label: "למורים בלבד", tone: "neutral" },
-  parents: { label: "להורים בלבד", tone: "neutral" },
-  class: { label: "כיתה ספציפית", tone: "warning" },
+  grades: { label: "שכבה", tone: "warning" },
+  classes: { label: "הודעה כיתתית", tone: "neutral" },
 };
 
 export default function AnnouncementCard({ announcement, onDelete }) {
   const { user } = useAuth();
-  const targetConfig = TARGET_LABELS[announcement.target] || {
-    label: announcement.target,
+  const audienceType = announcement.audience?.type || "all";
+  const targetConfig = AUDIENCE_LABELS[audienceType] || {
+    label: "הודעה",
     tone: "neutral",
   };
 

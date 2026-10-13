@@ -37,7 +37,7 @@ export default function AdminAnnouncements() {
     },
   });
 
-  const items = data?.items || [];
+  const items = Array.isArray(data) ? data : data?.items || [];
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: "var(--space-6)", maxWidth: 840, marginInline: "auto" }}>

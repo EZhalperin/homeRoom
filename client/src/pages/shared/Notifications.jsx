@@ -48,7 +48,7 @@ export default function Notifications() {
     },
   });
 
-  const items = data?.items || [];
+  const items = Array.isArray(data) ? data : data?.items || [];
   const hasUnread = items.some((n) => !n.readAt);
 
   const handleClick = (notif) => {

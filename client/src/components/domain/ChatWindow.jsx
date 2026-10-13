@@ -3,6 +3,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { getChatMessages, sendChatMessage, markChatRoomRead } from "../../api/chat.js";
 import { useSocket } from "../../hooks/useSocket.js";
 import { useAuth } from "../../hooks/useAuth.js";
+import { useToast } from "../ui/Toast.jsx";
 import { formatDateTime } from "../../utils/formatters.js";
 import Spinner from "../ui/Spinner.jsx";
 import styles from "./ChatWindow.module.css";
@@ -10,6 +11,7 @@ import styles from "./ChatWindow.module.css";
 export default function ChatWindow({ room, onBack }) {
   const { user } = useAuth();
   const { socket } = useSocket();
+  const { addToast } = useToast();
   const queryClient = useQueryClient();
   const [inputText, setInputText] = useState("");
   const [isOtherTyping, setIsOtherTyping] = useState(false);
@@ -32,6 +34,9 @@ export default function ChatWindow({ room, onBack }) {
     onSuccess: (newMsg) => {
       queryClient.setQueryData(["chat-messages", roomId], (old = []) => [newMsg, ...old]);
       queryClient.invalidateQueries({ queryKey: ["chat-rooms"] });
+    },
+    onError: (err) => {
+      addToast({ text: err.response?.data?.message || "שגיאה בשליחת ההודעה", tone: "danger" });
     },
   });
 
@@ -174,7 +179,7 @@ export default function ChatWindow({ room, onBack }) {
           className={styles.sendBtn}
           disabled={!inputText.trim() || sendMutation.isPending}
         >
-          שלח
+          {sendMutation.isPending ? "שולח..." : "שלח"}
         </button>
       </form>
     </div>

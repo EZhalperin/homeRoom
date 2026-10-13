@@ -39,7 +39,7 @@ export default function TeacherAnnouncements() {
     },
   });
 
-  const items = data?.items || [];
+  const items = Array.isArray(data) ? data : data?.items || [];
   const defaultClassId = myClass?.id || myClass?._id;
 
   return (

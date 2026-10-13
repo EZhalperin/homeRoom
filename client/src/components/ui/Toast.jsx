@@ -1,4 +1,4 @@
-import { createContext, useCallback, useContext, useMemo, useState } from "react";
+﻿import { createContext, useCallback, useContext, useMemo, useState } from "react";
 import styles from "./Toast.module.css";
 
 const ToastContext = createContext(null);
@@ -14,7 +14,18 @@ export function ToastProvider({ children }) {
   }, []);
 
   const api = useMemo(
-    () => ({ success: (m) => push(m, "success"), error: (m) => push(m, "error") }),
+    () => ({
+      success: (m) => push(m, "success"),
+      error: (m) => push(m, "error"),
+      addToast: (t) => {
+        if (typeof t === "string") {
+          push(t, "success");
+        } else {
+          const type = t?.tone === "danger" ? "error" : "success";
+          push(t?.text || t?.message || "", type);
+        }
+      },
+    }),
     [push],
   );
 

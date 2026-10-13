@@ -57,7 +57,9 @@ export default function NotificationBell() {
   }, [isOpen]);
 
   const count = unreadData?.count || 0;
-  const notifications = notificationsData?.items || [];
+  const notifications = Array.isArray(notificationsData)
+    ? notificationsData
+    : notificationsData?.items || [];
 
   const handleItemClick = async (notif) => {
     if (!notif.readAt) {
