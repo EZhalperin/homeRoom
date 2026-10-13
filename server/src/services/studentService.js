@@ -1,9 +1,11 @@
-import * as classRepository from "../repositories/classRepository.js";
+﻿import * as classRepository from "../repositories/classRepository.js";
 import * as studentRepository from "../repositories/studentRepository.js";
+import * as notificationService from "./notificationService.js";
 import { buildStudentDoc } from "../models/Class.js";
 import { AppError } from "../utils/AppError.js";
 import { weightedAverage } from "./gradeService.js";
 import { calculate } from "./riskIndexService.js";
+import { RISK_CONFIG } from "../config/risk.config.js";
 
 /**
  * Student / class business logic. No Express objects.
@@ -90,13 +92,40 @@ export async function removeStudent({ classId, studentUuid }) {
 
 /**
  * Loads the student, computes the (pure) risk index and stores it.
+ * Notifies the teacher when crossing WARNING_THRESHOLD or ALERT_THRESHOLD upward.
  * @param {string} studentUuid
  * @returns {Promise<number>}
  */
 export async function recomputeForStudent(studentUuid) {
   const found = await studentRepository.findStudentByUuid(studentUuid);
   if (!found) throw new AppError("Student not found", 404);
+
+  const oldIndex = found.student.academicRiskIndex ?? 0;
   const index = calculate(found.student, new Date());
   await studentRepository.setRiskIndex(studentUuid, index);
+
+  // Trigger: only on crossing WARNING_THRESHOLD or ALERT_THRESHOLD upward
+  const crossedAlert = oldIndex < RISK_CONFIG.ALERT_THRESHOLD && index >= RISK_CONFIG.ALERT_THRESHOLD;
+  const crossedWarning = oldIndex < RISK_CONFIG.WARNING_THRESHOLD && index >= RISK_CONFIG.WARNING_THRESHOLD;
+
+  if ((crossedAlert || crossedWarning) && found.teacherId) {
+    const isAlert = index >= RISK_CONFIG.ALERT_THRESHOLD;
+    const title = isAlert ? "התראת סיכון אקדמי גבוה" : "אזהרת סיכון אקדמי";
+    const body = `${found.student.firstName} ${found.student.lastName}: מדד הסיכון עלה ל-${index.toFixed(1)}`;
+    await notificationService.createMany([found.teacherId], {
+      type: "risk",
+      title,
+      body,
+      link: "/teacher/risk",
+      data: {
+        studentUuid,
+        studentName: `${found.student.firstName} ${found.student.lastName}`,
+        oldIndex,
+        newIndex: index,
+        threshold: isAlert ? "alert" : "warning",
+      },
+    });
+  }
+
   return index;
 }

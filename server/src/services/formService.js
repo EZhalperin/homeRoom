@@ -1,5 +1,6 @@
-import * as classRepository from "../repositories/classRepository.js";
+﻿import * as classRepository from "../repositories/classRepository.js";
 import * as formRepository from "../repositories/formRepository.js";
+import * as notificationService from "./notificationService.js";
 import { buildFormDoc } from "../models/Class.js";
 import { AppError } from "../utils/AppError.js";
 import { resolveParentStudent } from "./studentService.js";
@@ -16,6 +17,22 @@ async function teacherActiveClass(teacherUserId) {
 export async function createForm({ teacherUserId, title, description, deadline }) {
   const cls = await teacherActiveClass(teacherUserId);
   await formRepository.distributeForm(cls._id, buildFormDoc({ title, description, deadline }));
+
+  // Trigger: notify parents of the class
+  const parentUserIds = (cls.students || [])
+    .map((s) => s.studentId)
+    .filter(Boolean);
+
+  if (parentUserIds.length > 0) {
+    await notificationService.createMany(parentUserIds, {
+      type: "form",
+      title: "טופס חדש למילוי",
+      body: `פורסם טופס חדש: ${title}`,
+      link: "/parent/forms",
+      data: { formTitle: title, deadline },
+    });
+  }
+
   return { teacherId: teacherUserId, title, description, deadline };
 }
 

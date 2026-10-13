@@ -1,7 +1,8 @@
-import AppShell from "./AppShell.jsx";
+﻿import AppShell from "./AppShell.jsx";
 
 const NAV = [
   { to: "/parent", label: "סקירה", end: true },
+  { to: "/parent/announcements", label: "הודעות" },
   { to: "/parent/forms", label: "טפסים" },
   { to: "/parent/chat", label: "צ'אט" },
   { to: "/parent/profile", label: "פרופיל" },
