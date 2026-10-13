@@ -109,8 +109,8 @@ export default function ChatWindow({ room, onBack }) {
 
   const title =
     user.role === "teacher"
-      ? room.studentName ? `הורי ${room.studentName}` : "הורים"
-      : "מחנך/ת הכיתה";
+      ? room?.studentName ? `הורי ${room.studentName}` : "הורים"
+      : room?.teacherName ? `המחנך/ת ${room.teacherName}` : "מחנך/ת הכיתה";
 
   return (
     <div className={styles.window}>

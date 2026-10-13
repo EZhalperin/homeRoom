@@ -100,3 +100,37 @@ export async function updateById(id, payload) {
   if (!row) throw new AppError("User not found", 404);
   return row;
 }
+export async function findManyByUserIds(userIds) {
+  if (!Array.isArray(userIds) || userIds.length === 0) return [];
+  const unique = Array.from(new Set(userIds.filter(Boolean)));
+  if (unique.length === 0) return [];
+  const { data, error } = await supabase
+    .from(TABLE)
+    .select("userId, firstName, lastName")
+    .in("userId", unique);
+  throwIfSupabaseError(error);
+  return data || [];
+}
+export async function countUserStats() {
+  const [adminRes, teacherRes, parentRes, activeRes, suspendedRes] = await Promise.all([
+    supabase.from(TABLE).select("*", { count: "exact", head: true }).eq("role", "admin"),
+    supabase.from(TABLE).select("*", { count: "exact", head: true }).eq("role", "teacher"),
+    supabase.from(TABLE).select("*", { count: "exact", head: true }).eq("role", "parent"),
+    supabase.from(TABLE).select("*", { count: "exact", head: true }).eq("isActive", true),
+    supabase.from(TABLE).select("*", { count: "exact", head: true }).eq("isActive", false),
+  ]);
+
+  if (adminRes.error) throwIfSupabaseError(adminRes.error);
+  if (teacherRes.error) throwIfSupabaseError(teacherRes.error);
+  if (parentRes.error) throwIfSupabaseError(parentRes.error);
+  if (activeRes.error) throwIfSupabaseError(activeRes.error);
+  if (suspendedRes.error) throwIfSupabaseError(suspendedRes.error);
+
+  return {
+    admin: adminRes.count || 0,
+    teacher: teacherRes.count || 0,
+    parent: parentRes.count || 0,
+    active: activeRes.count || 0,
+    suspended: suspendedRes.count || 0,
+  };
+}

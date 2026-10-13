@@ -4,44 +4,45 @@ import { forgotPassword } from "../../api/auth.js";
 import Card from "../../components/ui/Card.jsx";
 import Input from "../../components/ui/Input.jsx";
 import Button from "../../components/ui/Button.jsx";
-
-const CONFIRMATION_MESSAGE = "אם הכתובת קיימת במערכת, נשלח אליה קישור לאיפוס סיסמה.";
+import { useToast } from "../../components/ui/Toast.jsx";
+import { getErrorMessage } from "../../utils/errors.js";
+import styles from "./ForgotPassword.module.css";
 
 export default function ForgotPassword() {
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const toast = useToast();
 
   async function onSubmit(e) {
     e.preventDefault();
-    if (!email.trim()) return;
     setLoading(true);
     try {
       await forgotPassword(email.trim());
-    } catch {
-      // Neutral handling: do not expose server errors or user existence
+      setSubmitted(true);
+    } catch (err) {
+      toast.error(getErrorMessage(err) || "שגיאה בבקשת איפוס סיסמה.");
     } finally {
       setLoading(false);
-      setSubmitted(true);
     }
   }
 
   return (
-    <Card title="שכחת סיסמה?">
+    <Card title="שכחתי סיסמה">
       {submitted ? (
-        <div className="stack" style={{ textAlign: "center" }}>
-          <p role="status" aria-live="polite" style={{ fontSize: "1rem", lineHeight: 1.6 }}>
-            {CONFIRMATION_MESSAGE}
+        <div className={styles.successWrap}>
+          <p className={styles.successText}>
+            אם קיים חשבון עם כתובת זו, נשלח אליך קישור לאיפוס סיסמה בדקות הקרובות.
           </p>
-          <div style={{ marginTop: "1rem" }}>
-            <Link to="/login" style={{ color: "var(--color-primary)" }}>
+          <div className={styles.footer}>
+            <Link to="/login" className={styles.primaryLink}>
               חזרה לדף ההתחברות
             </Link>
           </div>
         </div>
       ) : (
-        <form className="stack" onSubmit={onSubmit}>
-          <p style={{ color: "var(--color-muted)", margin: 0, fontSize: "0.95rem" }}>
+        <form className={styles.form} onSubmit={onSubmit}>
+          <p className={styles.description}>
             הזן את כתובת האימייל המשויכת לחשבונך ונשלח אליך קישור לאיפוס הסיסמה.
           </p>
           <Input
@@ -56,8 +57,8 @@ export default function ForgotPassword() {
           <Button type="submit" loading={loading} disabled={loading}>
             שליחת קישור לאיפוס
           </Button>
-          <div style={{ textAlign: "center", marginTop: "0.5rem" }}>
-            <Link to="/login" style={{ color: "var(--color-muted)", fontSize: "0.9rem" }}>
+          <div className={styles.footer}>
+            <Link to="/login" className={styles.backLink}>
               חזרה להתחברות
             </Link>
           </div>

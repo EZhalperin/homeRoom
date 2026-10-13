@@ -1,15 +1,15 @@
-import styles from "./Card.module.css";
+﻿import styles from "./Card.module.css";
 
-export default function Card({ title, actions, children, className = "" }) {
+export default function Card({ title, actions, interactive = false, children, className = "" }) {
   return (
-    <section className={`${styles.card} ${className}`}>
+    <div className={`${styles.card} ${interactive ? styles.interactive : ""} ${className}`}>
       {(title || actions) && (
         <header className={styles.header}>
-          {title && <h2>{title}</h2>}
-          {actions}
+          {title && <h3 className={styles.title}>{title}</h3>}
+          {actions && <div>{actions}</div>}
         </header>
       )}
       {children}
-    </section>
+    </div>
   );
 }

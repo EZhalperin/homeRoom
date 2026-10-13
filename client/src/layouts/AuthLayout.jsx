@@ -1,12 +1,50 @@
-import { Outlet } from "react-router-dom";
+﻿import { Outlet } from "react-router-dom";
+import { GraduationCap, CheckCircle2 } from "lucide-react";
+import styles from "./AuthLayout.module.css";
 
 export default function AuthLayout() {
   return (
-    <div className="auth-wrap">
-      <div className="auth-box stack">
-        <h1 style={{ textAlign: "center", color: "var(--color-primary)" }}>HomeRoom</h1>
-        <Outlet />
-      </div>
+    <div className={styles.wrap}>
+      <aside className={styles.brandPanel} aria-hidden="true">
+        <div className={styles.brandHeader}>
+          <GraduationCap size={36} className={styles.brandLogo} />
+          <span className={styles.brandName}>HomeRoom</span>
+        </div>
+
+        <div className={styles.brandBody}>
+          <h1 className={styles.tagline}>
+            מערכת ניהול פדגוגית חכמה ומקשרת
+          </h1>
+          <ul className={styles.featuresList}>
+            <li className={styles.featureItem}>
+              <CheckCircle2 size={20} className={styles.featureCheck} />
+              <span>תקשורת שקופה וישירה בין מחנכים, הורים והנהלה</span>
+            </li>
+            <li className={styles.featureItem}>
+              <CheckCircle2 size={20} className={styles.featureCheck} />
+              <span>מעקב נוכחות וציונים רציף ובזמן אמת</span>
+            </li>
+            <li className={styles.featureItem}>
+              <CheckCircle2 size={20} className={styles.featureCheck} />
+              <span>מדד סיכון אקדמי לזיהוי מוקדם של מגמות לימודיות</span>
+            </li>
+          </ul>
+        </div>
+
+        <div className={styles.brandFooter}>
+          <span>© HomeRoom · מערכת מוגנת ומאובטחת</span>
+        </div>
+      </aside>
+
+      <section className={styles.formPanel}>
+        <div className={styles.mobileBrand}>
+          <GraduationCap size={40} className={styles.mobileLogo} />
+          <h2 className={styles.mobileTitle}>HomeRoom</h2>
+        </div>
+        <div className={styles.formBox}>
+          <Outlet />
+        </div>
+      </section>
     </div>
   );
 }

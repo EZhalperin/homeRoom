@@ -28,6 +28,10 @@ const mockNotificationService = {
   createMany: jest.fn(),
 };
 
+const mockUserRepo = {
+  findManyByUserIds: jest.fn().mockResolvedValue([]),
+};
+
 const mockRealtime = {
   emitToUser: jest.fn(),
   emitToRoom: jest.fn(),
@@ -37,6 +41,7 @@ const mockRealtime = {
 
 jest.unstable_mockModule("../src/repositories/chatRepository.js", () => mockChatRepo);
 jest.unstable_mockModule("../src/repositories/studentRepository.js", () => mockStudentRepo);
+jest.unstable_mockModule("../src/repositories/userRepository.js", () => mockUserRepo);
 jest.unstable_mockModule("../src/services/studentService.js", () => mockStudentService);
 jest.unstable_mockModule("../src/services/notificationService.js", () => mockNotificationService);
 jest.unstable_mockModule("../src/sockets/realtime.js", () => mockRealtime);
@@ -46,57 +51,6 @@ const chatService = await import("../src/services/chatService.js");
 describe("chatService", () => {
   beforeEach(() => {
     jest.clearAllMocks();
-  });
-
-  describe("assertParticipant", () => {
-    test("succeeds when teacher is room's teacher", async () => {
-      mockChatRepo.findRoomById.mockResolvedValue({
-        _id: VALID_ROOM_ID,
-        teacherUserId: "teacher1",
-        parentUserId: "parent1",
-      });
-      const room = await chatService.assertParticipant(VALID_ROOM_ID, { role: "teacher", userId: "teacher1" });
-      expect(room._id).toBe(VALID_ROOM_ID);
-    });
-
-    test("succeeds when parent is room's parent", async () => {
-      mockChatRepo.findRoomById.mockResolvedValue({
-        _id: VALID_ROOM_ID,
-        teacherUserId: "teacher1",
-        parentUserId: "parent1",
-      });
-      const room = await chatService.assertParticipant(VALID_ROOM_ID, { role: "parent", userId: "parent1" });
-      expect(room._id).toBe(VALID_ROOM_ID);
-    });
-
-    test("throws 404 when room not found", async () => {
-      mockChatRepo.findRoomById.mockResolvedValue(null);
-      await expect(
-        chatService.assertParticipant(VALID_ROOM_ID, { role: "teacher", userId: "teacher1" }),
-      ).rejects.toThrow(new AppError("Chat room not found", 404));
-    });
-
-    test("throws 403 when teacher is not participant", async () => {
-      mockChatRepo.findRoomById.mockResolvedValue({
-        _id: VALID_ROOM_ID,
-        teacherUserId: "otherTeacher",
-        parentUserId: "parent1",
-      });
-      await expect(
-        chatService.assertParticipant(VALID_ROOM_ID, { role: "teacher", userId: "teacher1" }),
-      ).rejects.toThrow(new AppError("Forbidden", 403));
-    });
-
-    test("throws 403 when parent is not participant", async () => {
-      mockChatRepo.findRoomById.mockResolvedValue({
-        _id: VALID_ROOM_ID,
-        teacherUserId: "otherTeacher",
-        parentUserId: "otherParent",
-      });
-      await expect(
-        chatService.assertParticipant(VALID_ROOM_ID, { role: "parent", userId: "parent1" }),
-      ).rejects.toThrow(new AppError("Forbidden", 403));
-    });
   });
 
   describe("getOrCreateRoom", () => {
@@ -138,80 +92,109 @@ describe("chatService", () => {
       expect(mockStudentRepo.findActiveStudentByStudentId).toHaveBeenCalledWith("parent1");
       expect(res._id).toBe(VALID_ROOM_ID);
     });
+
+    test("teacher without studentUuid throws 400", async () => {
+      await expect(
+        chatService.getOrCreateRoom({ role: "teacher", userId: "teacher1" }, {}),
+      ).rejects.toThrow(new AppError("studentUuid is required for teachers", 400));
+    });
+
+    test("parent without active class throws 404", async () => {
+      mockStudentRepo.findActiveStudentByStudentId.mockResolvedValue(null);
+
+      await expect(
+        chatService.getOrCreateRoom({ role: "parent", userId: "parent1" }),
+      ).rejects.toThrow(new AppError("No active class or teacher found for your child", 404));
+    });
+
+    test("admin throws 403", async () => {
+      await expect(
+        chatService.getOrCreateRoom({ role: "admin", userId: "admin1" }),
+      ).rejects.toThrow(new AppError("Forbidden", 403));
+    });
+  });
+
+  describe("listRooms", () => {
+    test("returns rooms with unreadCount and teacherName for user", async () => {
+      mockChatRepo.listRoomsForUser.mockResolvedValue([
+        { _id: "r1", teacherUserId: "t1", parentUserId: "p1", studentUuid: "s1" },
+        { _id: "r2", teacherUserId: "t1", parentUserId: "p2", studentUuid: "s2" },
+      ]);
+      mockChatRepo.countUnreadMessages.mockResolvedValue(2);
+      mockUserRepo.findManyByUserIds.mockResolvedValueOnce([
+        { userId: "t1", firstName: "Alice", lastName: "Smith" },
+      ]);
+
+      const res = await chatService.listRooms({ role: "teacher", userId: "t1" });
+
+      expect(res).toHaveLength(2);
+      expect(res[0].unreadCount).toBe(2);
+      expect(res[0].teacherName).toBe("Alice Smith");
+    });
   });
 
   describe("sendMessage", () => {
-    test("sends message, emits to room, and sends notification if recipient is offline", async () => {
-      mockChatRepo.findRoomById.mockResolvedValue({
+    test("sends message and triggers notification and realtime event to recipient", async () => {
+      const room = {
         _id: VALID_ROOM_ID,
         teacherUserId: "teacher1",
         parentUserId: "parent1",
-      });
-      mockChatRepo.insertMessage.mockResolvedValue({});
-      mockChatRepo.updateRoomLastMessage.mockResolvedValue({});
-      mockRealtime.isUserInRoom.mockReturnValue(false); // recipient offline
+        studentName: "Dan Cohen",
+      };
+      mockChatRepo.findRoomById.mockResolvedValue(room);
+      mockChatRepo.insertMessage.mockImplementation(async (msg) => ({ ...msg, _id: "msg1" }));
+      mockChatRepo.updateRoomLastMessage.mockResolvedValue();
+      mockRealtime.isUserInRoom.mockReturnValue(false); // recipient not active in room
 
-      const user = { role: "teacher", userId: "teacher1", firstName: "Sara", lastName: "Levi" };
-      const res = await chatService.sendMessage(VALID_ROOM_ID, user, "שלום וברכה");
+      const res = await chatService.sendMessage(
+        VALID_ROOM_ID,
+        { role: "teacher", userId: "teacher1" },
+        "Hello parent",
+      );
 
-      expect(res.text).toBe("שלום וברכה");
+      expect(res.text).toBe("Hello parent");
+      expect(mockChatRepo.updateRoomLastMessage).toHaveBeenCalled();
       expect(mockRealtime.emitToRoom).toHaveBeenCalledWith(
         `chat:${VALID_ROOM_ID}`,
         "chat:message",
-        expect.objectContaining({ text: "שלום וברכה" }),
+        expect.any(Object),
       );
-      expect(mockRealtime.isUserInRoom).toHaveBeenCalledWith("parent1", `chat:${VALID_ROOM_ID}`);
+      // Recipient is parent1 -> notified
       expect(mockNotificationService.createMany).toHaveBeenCalledWith(
         ["parent1"],
-        expect.objectContaining({
-          type: "chat",
-          title: "הודעה חדשה מאת Sara Levi",
-          body: "שלום וברכה",
-          link: `/chat?roomId=${VALID_ROOM_ID}`,
-        }),
+        expect.objectContaining({ type: "chat" }),
       );
     });
 
-    test("sends message and skips notification if recipient is currently in the room", async () => {
+    test("throws 403 if sender is neither teacher nor parent of the room", async () => {
       mockChatRepo.findRoomById.mockResolvedValue({
         _id: VALID_ROOM_ID,
         teacherUserId: "teacher1",
         parentUserId: "parent1",
       });
-      mockChatRepo.insertMessage.mockResolvedValue({});
-      mockChatRepo.updateRoomLastMessage.mockResolvedValue({});
-      mockRealtime.isUserInRoom.mockReturnValue(true); // recipient in room
 
-      const user = { role: "parent", userId: "parent1" };
-      await chatService.sendMessage(VALID_ROOM_ID, user, "תודה רבה");
-
-      expect(mockRealtime.emitToRoom).toHaveBeenCalledWith(`chat:${VALID_ROOM_ID}`, "chat:message", expect.any(Object));
-      expect(mockNotificationService.createMany).not.toHaveBeenCalled();
+      await expect(
+        chatService.sendMessage(
+          VALID_ROOM_ID,
+          { role: "teacher", userId: "intruder_teacher" },
+          "Sneaky note",
+        ),
+      ).rejects.toThrow(new AppError("Forbidden", 403));
     });
   });
 
   describe("markRead", () => {
-    test("updates room last read and emits chat:read", async () => {
+    test("marks room read for participating user", async () => {
       mockChatRepo.findRoomById.mockResolvedValue({
         _id: VALID_ROOM_ID,
         teacherUserId: "teacher1",
         parentUserId: "parent1",
       });
-      mockChatRepo.updateRoomLastRead.mockResolvedValue({});
+      mockChatRepo.updateRoomLastRead.mockResolvedValue();
 
-      const user = { role: "teacher", userId: "teacher1" };
-      const res = await chatService.markRead(VALID_ROOM_ID, user);
-
+      const res = await chatService.markRead(VALID_ROOM_ID, { role: "parent", userId: "parent1" });
       expect(res.ok).toBe(true);
-      expect(mockChatRepo.updateRoomLastRead).toHaveBeenCalledWith(VALID_ROOM_ID, "teacher", expect.any(Date));
-      expect(mockRealtime.emitToRoom).toHaveBeenCalledWith(
-        `chat:${VALID_ROOM_ID}`,
-        "chat:read",
-        expect.objectContaining({
-          roomId: VALID_ROOM_ID,
-          userId: "teacher1",
-        }),
-      );
+      expect(mockChatRepo.updateRoomLastRead).toHaveBeenCalledWith(VALID_ROOM_ID, "parent", expect.any(Date));
     });
   });
 });

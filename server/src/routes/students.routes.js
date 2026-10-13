@@ -1,4 +1,4 @@
-import { Router } from "express";
+﻿import { Router } from "express";
 import { verifyToken } from "../middleware/authenticate.js";
 import { authorizeRole } from "../middleware/authorizeRole.js";
 import { teacherOwnsClass } from "../middleware/ownership.js";
@@ -7,6 +7,7 @@ import {
   addStudentSchema,
   classStudentsParamSchema,
   deleteStudentSchema,
+  studentIdParamSchema,
 } from "../validators/students.validator.js";
 import {
   addStudent,
@@ -14,6 +15,7 @@ import {
   listClassStudents,
   getMyChild,
   deleteStudent,
+  getStudentRisk,
 } from "../controllers/students.controller.js";
 
 const router = Router();
@@ -35,6 +37,14 @@ router.get(
   validate(classStudentsParamSchema),
   teacherOwnsClass,
   listClassStudents,
+);
+
+router.get(
+  "/teachers/students/:id/risk",
+  verifyToken,
+  authorizeRole("teacher"),
+  validate(studentIdParamSchema),
+  getStudentRisk,
 );
 
 router.get("/parents/my-child", verifyToken, authorizeRole("parent"), getMyChild);

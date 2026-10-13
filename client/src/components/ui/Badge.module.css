@@ -1,9 +1,43 @@
-.badge {
-  display: inline-block; padding: var(--space-1) var(--space-3);
-  border-radius: var(--radius-pill); font-size: var(--fs-sm); font-weight: 600;
+﻿.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding-block: 2px;
+  padding-inline: var(--space-2);
+  border-radius: var(--radius-pill);
+  font-size: var(--fs-xs);
+  font-weight: 600;
+  line-height: 1.4;
+  border: 1px solid transparent;
+  white-space: nowrap;
 }
-.neutral { background: var(--color-border); color: var(--color-text); }
-.info { background: var(--color-primary-soft); color: var(--color-primary); }
-.success { background: var(--color-success-soft); color: var(--color-success); }
-.warning { background: var(--color-warning-soft); color: var(--color-warning); }
-.danger { background: var(--color-danger-soft); color: var(--color-danger); }
+
+.neutral {
+  background-color: var(--color-bg);
+  color: var(--color-text-muted);
+  border-color: var(--color-border);
+}
+
+.info {
+  background-color: var(--color-info-soft);
+  color: var(--color-info-text);
+  border-color: rgba(2, 132, 199, 0.2);
+}
+
+.success {
+  background-color: var(--color-success-soft);
+  color: var(--color-success-text);
+  border-color: rgba(22, 163, 74, 0.2);
+}
+
+.warning {
+  background-color: var(--color-warning-soft);
+  color: var(--color-warning-text);
+  border-color: rgba(217, 119, 6, 0.25);
+}
+
+.danger {
+  background-color: var(--color-danger-soft);
+  color: var(--color-danger-text);
+  border-color: rgba(220, 38, 38, 0.25);
+}

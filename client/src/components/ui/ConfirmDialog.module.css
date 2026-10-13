@@ -1,0 +1,20 @@
+﻿.content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.message {
+  color: var(--color-text);
+  font-size: var(--fs-md);
+  line-height: var(--lh-body);
+  margin: 0;
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--space-3);
+  margin-block-start: var(--space-2);
+}

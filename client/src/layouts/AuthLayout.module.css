@@ -1,0 +1,122 @@
+﻿.wrap {
+  min-height: 100dvh;
+  display: flex;
+  background-color: var(--color-bg);
+}
+
+.brandPanel {
+  display: none;
+  flex: 1.1;
+  background: linear-gradient(135deg, var(--color-primary-900) 0%, var(--color-primary-700) 100%);
+  color: #ffffff;
+  padding: var(--space-10);
+  flex-direction: column;
+  justify-content: space-between;
+  position: relative;
+  overflow: hidden;
+}
+
+[data-theme="dark"] .brandPanel {
+  background: linear-gradient(135deg, #090d16 0%, #1e293b 100%);
+}
+
+.brandHeader {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.brandLogo {
+  color: #ffffff;
+}
+
+.brandName {
+  font-size: var(--fs-2xl);
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  color: #ffffff;
+}
+
+.brandBody {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+  max-width: 32rem;
+}
+
+.tagline {
+  font-size: var(--fs-3xl);
+  font-weight: 700;
+  line-height: var(--lh-tight);
+  color: #ffffff;
+  margin: 0;
+}
+
+.featuresList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.featureItem {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  font-size: var(--fs-md);
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.featureCheck {
+  color: var(--color-primary-300);
+  flex-shrink: 0;
+}
+
+.brandFooter {
+  font-size: var(--fs-xs);
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.formPanel {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-6) var(--space-4);
+  min-height: 100dvh;
+}
+
+.mobileBrand {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-1);
+  margin-block-end: var(--space-6);
+}
+
+.mobileLogo {
+  color: var(--color-primary);
+}
+
+.mobileTitle {
+  font-size: var(--fs-xl);
+  font-weight: 800;
+  color: var(--color-text);
+  margin: 0;
+}
+
+.formBox {
+  width: min(100%, 26rem);
+}
+
+@media (min-width: 960px) {
+  .brandPanel {
+    display: flex;
+  }
+  .mobileBrand {
+    display: none;
+  }
+}

@@ -7,7 +7,8 @@ import {
 import { authorizeRole } from "../middleware/authorizeRole.js";
 import { validate } from "../middleware/validate.js";
 import {
-  createAnnouncementSchema,
+  createAdminAnnouncementSchema,
+  createTeacherAnnouncementSchema,
   listAnnouncementsSchema,
   announcementIdParamSchema,
 } from "../validators/announcements.validator.js";
@@ -17,7 +18,13 @@ const router = Router();
 router.post(
   "/",
   authorizeRole("admin", "teacher"),
-  validate(createAnnouncementSchema),
+  (req, res, next) => {
+    const schema =
+      req.user?.role === "teacher"
+        ? createTeacherAnnouncementSchema
+        : createAdminAnnouncementSchema;
+    return validate(schema)(req, res, next);
+  },
   createAnnouncement,
 );
 

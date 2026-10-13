@@ -1,4 +1,4 @@
-import { asyncHandler } from "../utils/asyncHandler.js";
+﻿import { asyncHandler } from "../utils/asyncHandler.js";
 import * as studentService from "../services/studentService.js";
 
 export const addStudent = asyncHandler(async (req, res) => {
@@ -30,4 +30,9 @@ export const deleteStudent = asyncHandler(async (req, res) => {
     studentUuid: req.validated.params.id,
   });
   res.json({ message: "Student removed successfully", ...result });
+});
+
+export const getStudentRisk = asyncHandler(async (req, res) => {
+  const result = await studentService.getStudentRiskBreakdown(req.user.userId, req.validated.params.id);
+  res.json(result);
 });

@@ -13,6 +13,7 @@ import formsRoutes from "./forms.routes.js";
 import notificationsRoutes from "./notifications.routes.js";
 import announcementsRoutes from "./announcements.routes.js";
 import chatRoutes from "./chat.routes.js";
+import analyticsRoutes from "./analytics.routes.js";
 
 const router = Router();
 
@@ -22,6 +23,7 @@ router.use("/admin/users", verifyToken, isAdmin, adminUsersRoutes);
 router.use("/notifications", verifyToken, notificationsRoutes);
 router.use("/announcements", verifyToken, announcementsRoutes);
 router.use("/chat", verifyToken, chatRoutes);
+router.use("/analytics", verifyToken, analyticsRoutes);
 router.use(classesRoutes);
 router.use(studentsRoutes);
 router.use(gradesRoutes);

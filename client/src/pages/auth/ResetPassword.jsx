@@ -4,9 +4,10 @@ import { validatePasswordToken, resetPassword } from "../../api/auth.js";
 import Card from "../../components/ui/Card.jsx";
 import Input from "../../components/ui/Input.jsx";
 import Button from "../../components/ui/Button.jsx";
-import Spinner from "../../components/ui/Spinner.jsx";
+import Skeleton from "../../components/ui/Skeleton.jsx";
 import { useToast } from "../../components/ui/Toast.jsx";
 import { getErrorMessage } from "../../utils/errors.js";
+import styles from "./ResetPassword.module.css";
 
 function getPasswordStrength(p) {
   if (!p) return { label: "", score: 0 };
@@ -16,9 +17,9 @@ function getPasswordStrength(p) {
   if (/[A-Za-z]/.test(p) && /[0-9]/.test(p)) score++;
   if (/[^A-Za-z0-9]/.test(p)) score++;
 
-  if (score <= 1) return { label: "חלשה", color: "var(--color-danger, #ef4444)" };
-  if (score === 2) return { label: "בינונית", color: "var(--color-warning, #f59e0b)" };
-  return { label: "חזקה", color: "var(--color-success, #10b981)" };
+  if (score <= 1) return { label: "חלשה", color: "var(--color-danger)" };
+  if (score === 2) return { label: "בינונית", color: "var(--color-warning)" };
+  return { label: "חזקה", color: "var(--color-success)" };
 }
 
 export default function ResetPassword() {
@@ -26,12 +27,11 @@ export default function ResetPassword() {
   const navigate = useNavigate();
   const toast = useToast();
 
-  // Read token on initial render into state, then immediately clean query string
   const [token] = useState(() => searchParams.get("token") || "");
 
   const [validating, setValidating] = useState(true);
   const [tokenError, setTokenError] = useState("");
-  const [purpose, setPurpose] = useState("reset"); // "invite" | "reset"
+  const [purpose, setPurpose] = useState("reset");
 
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -39,7 +39,6 @@ export default function ResetPassword() {
   const [submitError, setSubmitError] = useState("");
 
   useEffect(() => {
-    // Strip token from URL bar immediately to prevent history/referrer leakage
     if (searchParams.has("token")) {
       window.history.replaceState({}, document.title, window.location.pathname);
     }
@@ -92,8 +91,9 @@ export default function ResetPassword() {
   if (validating) {
     return (
       <Card title="בדיקת תקינות הקישור...">
-        <div style={{ display: "flex", justifyContent: "center", padding: "2rem" }}>
-          <Spinner />
+        <div className={styles.centerState}>
+          <Skeleton variant="text" width="60%" />
+          <Skeleton variant="rectangular" height={40} width="100%" />
         </div>
       </Card>
     );
@@ -102,16 +102,16 @@ export default function ResetPassword() {
   if (tokenError) {
     return (
       <Card title={pageTitle}>
-        <div className="stack" style={{ textAlign: "center" }}>
-          <p role="alert" aria-live="assertive" style={{ color: "var(--color-danger, #ef4444)" }}>
+        <div className={styles.centerState}>
+          <p role="alert" aria-live="assertive" className={styles.errorText}>
             {tokenError}
           </p>
-          <div className="row" style={{ justifyContent: "center", gap: "1rem", marginTop: "1rem" }}>
-            <Link to="/forgot-password" style={{ color: "var(--color-primary)" }}>
+          <div className={styles.linksRow}>
+            <Link to="/forgot-password" className={styles.primaryLink}>
               לבקשת קישור חדש
             </Link>
-            <span style={{ color: "var(--color-muted)" }}>•</span>
-            <Link to="/login" style={{ color: "var(--color-muted)" }}>
+            <span className={styles.separator}>•</span>
+            <Link to="/login" className={styles.mutedLink}>
               חזרה להתחברות
             </Link>
           </div>
@@ -122,7 +122,7 @@ export default function ResetPassword() {
 
   return (
     <Card title={pageTitle}>
-      <form className="stack" onSubmit={onSubmit}>
+      <form className={styles.form} onSubmit={onSubmit}>
         <Input
           label="סיסמה חדשה"
           type="password"
@@ -134,31 +134,22 @@ export default function ResetPassword() {
         />
 
         {password && (
-          <div style={{ fontSize: "0.85rem", display: "flex", gap: "0.5rem", alignItems: "center" }}>
-            <span style={{ color: "var(--color-muted)" }}>חוזק סיסמה:</span>
-            <strong style={{ color: strength.color }}>{strength.label}</strong>
+          <div className={styles.strengthIndicator}>
+            <span>חוזק סיסמה:</span>
+            <strong className={styles.strengthLabel} style={{ color: strength.color }}>{strength.label}</strong>
           </div>
         )}
 
-        <div
-          style={{
-            fontSize: "0.82rem",
-            color: "var(--color-muted)",
-            backgroundColor: "var(--color-bg-subtle, #f8fafc)",
-            padding: "0.75rem",
-            borderRadius: "6px",
-            border: "1px solid var(--color-border, #e2e8f0)",
-          }}
-        >
-          <p style={{ margin: "0 0 0.25rem 0", fontWeight: 600 }}>כללי סיסמה:</p>
-          <ul style={{ margin: 0, paddingInlineStart: "1.2rem" }}>
-            <li style={{ color: hasMinLength ? "var(--color-success, #10b981)" : "inherit" }}>
+        <div className={styles.rulesBox}>
+          <p className={styles.rulesTitle}>כללי סיסמה:</p>
+          <ul className={styles.rulesList}>
+            <li className={hasMinLength ? styles.ruleValid : styles.rulePending}>
               בין 8 ל-72 תווים
             </li>
-            <li style={{ color: hasLetter ? "var(--color-success, #10b981)" : "inherit" }}>
+            <li className={hasLetter ? styles.ruleValid : styles.rulePending}>
               לפחות אות אחת באנגלית
             </li>
-            <li style={{ color: hasDigit ? "var(--color-success, #10b981)" : "inherit" }}>
+            <li className={hasDigit ? styles.ruleValid : styles.rulePending}>
               לפחות ספרה אחת
             </li>
           </ul>
@@ -176,7 +167,7 @@ export default function ResetPassword() {
         />
 
         {submitError && (
-          <p role="alert" aria-live="polite" style={{ color: "var(--color-danger, #ef4444)" }}>
+          <p role="alert" aria-live="polite" className={styles.errorText}>
             {submitError}
           </p>
         )}

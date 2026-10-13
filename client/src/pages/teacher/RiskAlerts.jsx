@@ -1,18 +1,22 @@
+﻿import { useState } from "react";
 import { useMyClass } from "../../hooks/queries.js";
 import Spinner from "../../components/ui/Spinner.jsx";
 import EmptyState from "../../components/ui/EmptyState.jsx";
 import RiskBadge from "../../components/domain/RiskBadge.jsx";
+import RiskExplanationModal from "../../components/domain/RiskExplanationModal.jsx";
 import { RISK_WARNING } from "../../utils/constants.js";
 import { fullName } from "../../utils/formatters.js";
 
 export default function RiskAlerts() {
   const { data, isLoading, error } = useMyClass();
+  const [selectedStudentForRisk, setSelectedStudentForRisk] = useState(null);
+
   if (isLoading) return <Spinner />;
   if (error) return <EmptyState title="לא משויכת אליך כיתה פעילה" />;
 
-  const atRisk = data.students
-    .filter((s) => s.academicRiskIndex >= RISK_WARNING)
-    .sort((a, b) => b.academicRiskIndex - a.academicRiskIndex);
+  const atRisk = (data.students || [])
+    .filter((s) => (s.academicRiskIndex ?? 0) >= RISK_WARNING)
+    .sort((a, b) => (b.academicRiskIndex ?? 0) - (a.academicRiskIndex ?? 0));
 
   return (
     <div className="stack">
@@ -27,13 +31,24 @@ export default function RiskAlerts() {
               {atRisk.map((s) => (
                 <tr key={s.id}>
                   <td data-label="תלמיד">{fullName(s)}</td>
-                  <td data-label="מדד סיכון"><RiskBadge value={s.academicRiskIndex} /></td>
+                  <td data-label="מדד סיכון">
+                    <RiskBadge
+                      value={s.academicRiskIndex}
+                      onClick={() => setSelectedStudentForRisk(s)}
+                    />
+                  </td>
                 </tr>
               ))}
             </tbody>
           </table>
         </div>
       )}
+
+      <RiskExplanationModal
+        open={Boolean(selectedStudentForRisk)}
+        student={selectedStudentForRisk}
+        onClose={() => setSelectedStudentForRisk(null)}
+      />
     </div>
   );
 }

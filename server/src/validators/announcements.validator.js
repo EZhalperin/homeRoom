@@ -1,6 +1,26 @@
 ﻿import { z } from "zod";
 import { mongoObjectId } from "./common.js";
 
+export const createAdminAnnouncementSchema = z.object({
+  body: z.object({
+    title: z.string().trim().min(1, "Title is required").max(150, "Title must be at most 150 characters"),
+    body: z.string().trim().min(1, "Body is required").max(3000, "Body must be at most 3000 characters"),
+    audience: z.object({
+      type: z.enum(["all", "grades", "classes"]),
+      grades: z.array(z.string().trim().min(1)).optional(),
+      classIds: z.array(mongoObjectId).optional(),
+    }),
+  }),
+});
+
+export const createTeacherAnnouncementSchema = z.object({
+  body: z.object({
+    title: z.string().trim().min(1, "Title is required").max(150, "Title must be at most 150 characters"),
+    body: z.string().trim().min(1, "Body is required").max(3000, "Body must be at most 3000 characters"),
+    audience: z.undefined({ errorMap: () => ({ message: "Teachers cannot specify an audience" }) }),
+  }),
+});
+
 export const createAnnouncementSchema = z.object({
   body: z.object({
     title: z.string().trim().min(1, "Title is required").max(150, "Title must be at most 150 characters"),

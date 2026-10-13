@@ -18,7 +18,7 @@
 .backBtn {
   background: none;
   border: none;
-  font-size: 1.25rem;
+  font-size: var(--fs-lg);
   color: var(--color-text);
   cursor: pointer;
   padding: var(--space-1);
@@ -79,39 +79,39 @@
 }
 
 .ownRow {
-  align-self: flex-end;
-  align-items: flex-end;
+  align-self: flex-start;
+  align-items: flex-start;
 }
 
 .otherRow {
-  align-self: flex-start;
-  align-items: flex-start;
+  align-self: flex-end;
+  align-items: flex-end;
 }
 
 .bubble {
   padding: var(--space-2) var(--space-4);
   border-radius: var(--radius-md);
   word-break: break-word;
-  line-height: 1.5;
+  line-height: var(--lh-body);
   font-size: var(--fs-md);
-  box-shadow: var(--shadow-sm);
+  box-shadow: var(--shadow-xs);
 }
 
 .ownBubble {
   background-color: var(--color-primary);
-  color: #fff;
-  border-end-end-radius: 2px;
+  color: #ffffff;
+  border-end-start-radius: var(--radius-xs);
 }
 
 .otherBubble {
   background-color: var(--color-surface);
   color: var(--color-text);
   border: 1px solid var(--color-border);
-  border-end-start-radius: 2px;
+  border-end-end-radius: var(--radius-xs);
 }
 
 .messageTime {
-  font-size: 0.7rem;
+  font-size: var(--fs-xs);
   color: var(--color-text-muted);
   margin-block-start: 2px;
   padding-inline: var(--space-1);
@@ -129,7 +129,7 @@
 .textInput {
   flex: 1;
   min-height: var(--tap-target);
-  padding: var(--space-2) var(--space-3);
+  padding: var(--space-2) var(--space-4);
   background-color: var(--color-bg);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-pill);
@@ -137,11 +137,13 @@
   font-size: var(--fs-md);
   color: var(--color-text);
   outline: none;
-  transition: border-color 0.15s ease;
+  transition: border-color var(--dur-fast) var(--ease-out),
+              box-shadow var(--dur-fast) var(--ease-out);
 }
 
 .textInput:focus {
   border-color: var(--color-primary);
+  box-shadow: var(--focus-ring);
 }
 
 .sendBtn {
@@ -149,16 +151,16 @@
   height: var(--tap-target);
   border-radius: var(--radius-pill);
   background-color: var(--color-primary);
-  color: #fff;
+  color: #ffffff;
   border: none;
   cursor: pointer;
-  display: flex;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
   padding-inline: var(--space-4);
   font-weight: 600;
   font-size: var(--fs-sm);
-  transition: background-color 0.15s ease;
+  transition: background-color var(--dur-fast) var(--ease-out);
 }
 
 .sendBtn:hover:not(:disabled) {

@@ -8,7 +8,7 @@
   position: relative;
   width: var(--tap-target);
   height: var(--tap-target);
-  border-radius: var(--radius-sm);
+  border-radius: var(--radius-md);
   background: none;
   border: none;
   color: var(--color-text);
@@ -16,25 +16,30 @@
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: background-color 0.15s ease, color 0.15s ease;
+  transition: background-color var(--dur-fast) var(--ease-out), color var(--dur-fast) var(--ease-out);
 }
 
 .bellBtn:hover {
-  background-color: var(--color-primary-soft);
+  background-color: var(--color-surface-hover);
   color: var(--color-primary);
+}
+
+.bellBtn:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
 }
 
 .badge {
   position: absolute;
   top: 4px;
   inset-inline-end: 4px;
-  min-width: 18px;
-  height: 18px;
+  min-width: 1.125rem;
+  height: 1.125rem;
   padding-inline: 4px;
   border-radius: var(--radius-pill);
   background-color: var(--color-danger);
-  color: #fff;
-  font-size: 0.7rem;
+  color: #ffffff;
+  font-size: var(--fs-xs);
   font-weight: 700;
   display: flex;
   align-items: center;
@@ -50,12 +55,12 @@
   background-color: var(--color-surface);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
-  box-shadow: var(--shadow-md);
-  z-index: 50;
+  box-shadow: var(--shadow-lg);
+  z-index: var(--z-dropdown, 1000);
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  animation: fadeIn 0.15s ease-out;
+  animation: fadeIn var(--dur-fast) var(--ease-out);
 }
 
 @keyframes fadeIn {
@@ -86,6 +91,10 @@
   text-decoration: underline;
 }
 
+.markAllBtn:focus-visible {
+  box-shadow: var(--focus-ring);
+}
+
 .list {
   max-height: 320px;
   overflow-y: auto;
@@ -106,11 +115,11 @@
   cursor: pointer;
   color: var(--color-text);
   text-decoration: none;
-  transition: background-color 0.15s ease;
+  transition: background-color var(--dur-fast) var(--ease-out);
 }
 
 .item:hover {
-  background-color: var(--color-primary-soft);
+  background-color: var(--color-surface-hover);
 }
 
 .unreadItem {
@@ -141,11 +150,11 @@
 .body {
   font-size: var(--fs-sm);
   color: var(--color-text-muted);
-  line-height: 1.4;
+  line-height: var(--lh-body);
 }
 
 .date {
-  font-size: 0.75rem;
+  font-size: var(--fs-xs);
   color: var(--color-text-muted);
 }
 

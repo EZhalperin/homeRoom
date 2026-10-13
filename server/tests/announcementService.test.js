@@ -328,13 +328,13 @@ describe("announcementService & Realtime Triggers", () => {
           id: "uuid-2",
           firstName: "Lea",
           lastName: "Levi",
-          academicRiskIndex: 7.0, // already above 6.0
-          // mild decline that stays between 6.0 and 8.0
+          academicRiskIndex: 6.0, // already at warning
+          // decline stays at 6.0 without crossing alert (8.0)
           grades: [
             { subject: "Math", score: 90, date: new Date().toISOString() },
             { subject: "Math", score: 80, date: new Date().toISOString() },
           ],
-          attendance: Array.from({ length: 15 }, () => ({ type: "absence", date: new Date().toISOString() })),
+          attendance: [],
         },
       });
       mockStudentRepo.setRiskIndex.mockResolvedValueOnce();

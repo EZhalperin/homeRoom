@@ -1,4 +1,4 @@
-import { useState } from "react";
+﻿import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { adminCreateClass, adminDeleteClass, staffListClasses } from "../../api/classes.js";
@@ -64,12 +64,12 @@ export default function Classes() {
       {classes && classes.length > 0 && (
         <div className="table-wrap">
           <table className="table">
-            <thead><tr><th>כיתה</th><th>ת"ז מורה</th><th>תלמידים</th><th /></tr></thead>
+            <thead><tr><th>כיתה</th><th>מחנך/ת</th><th>תלמידים</th><th /></tr></thead>
             <tbody>
               {classes.map((c) => (
                 <tr key={c._id}>
                   <td data-label="כיתה">{c.className}</td>
-                  <td data-label='ת"ז מורה'>{c.teacherId}</td>
+                  <td data-label="מחנך/ת">{c.teacherName || c.teacherId || "—"}</td>
                   <td data-label="תלמידים">{c.studentsCount}</td>
                   <td>
                     <div className="row">

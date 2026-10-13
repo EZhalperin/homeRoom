@@ -1,10 +1,11 @@
 ﻿import * as classRepository from "../repositories/classRepository.js";
 import * as studentRepository from "../repositories/studentRepository.js";
 import * as notificationService from "./notificationService.js";
+import * as userRepository from "../repositories/userRepository.js";
 import { buildStudentDoc } from "../models/Class.js";
 import { AppError } from "../utils/AppError.js";
 import { weightedAverage } from "./gradeService.js";
-import { calculate } from "./riskIndexService.js";
+import { calculate, calculateBreakdown } from "./riskIndexService.js";
 import { RISK_CONFIG } from "../config/risk.config.js";
 
 /**
@@ -68,14 +69,28 @@ export async function getMyChild(parentUserId) {
   const found =
     await studentRepository.findActiveStudentByStudentId(parentUserId);
   if (!found) throw new AppError("Student not found", 404);
-  const { student } = found;
+  const { student, className, teacherId } = found;
+
+  let teacher = null;
+  if (teacherId) {
+    const teachers = await userRepository.findManyByUserIds([teacherId]);
+    if (teachers && teachers.length > 0) {
+      teacher = {
+        firstName: teachers[0].firstName || "",
+        lastName: teachers[0].lastName || "",
+      };
+    }
+  }
+
   return {
+    id: student.id,
     firstName: student.firstName,
     lastName: student.lastName,
+    className: className || null,
+    teacher,
     grades: student.grades || [],
     forms: student.forms || [],
     attendance: student.attendance || [],
-    id: student.id,
     weightedAverages: weightedAverage(student.grades),
   };
 }
@@ -128,4 +143,8 @@ export async function recomputeForStudent(studentUuid) {
   }
 
   return index;
+}
+export async function getStudentRiskBreakdown(teacherUserId, studentUuid) {
+  const found = await resolveTeacherStudent(teacherUserId, studentUuid);
+  return calculateBreakdown(found.student, new Date(), RISK_CONFIG);
 }

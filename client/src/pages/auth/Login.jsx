@@ -6,6 +6,7 @@ import Input from "../../components/ui/Input.jsx";
 import Button from "../../components/ui/Button.jsx";
 import { getErrorMessage } from "../../utils/errors.js";
 import { ROLE_HOME } from "../../utils/constants.js";
+import styles from "./Login.module.css";
 
 export default function Login() {
   const { user, login } = useAuth();
@@ -25,7 +26,6 @@ export default function Login() {
     try {
       const u = await login(userId.trim(), password);
       const from = location.state?.from?.pathname;
-      // Only honor "from" if it belongs to this user's area.
       const target = from && from.startsWith(ROLE_HOME[u.role]) ? from : ROLE_HOME[u.role];
       navigate(target, { replace: true });
     } catch (err) {
@@ -37,7 +37,7 @@ export default function Login() {
 
   return (
     <Card title="התחברות">
-      <form className="stack" onSubmit={onSubmit}>
+      <form className={styles.form} onSubmit={onSubmit}>
         <Input
           label="תעודת זהות"
           value={userId}
@@ -54,10 +54,10 @@ export default function Login() {
           autoComplete="current-password"
           required
         />
-        {error && <p role="alert" style={{ color: "var(--color-danger)" }}>{error}</p>}
+        {error && <p role="alert" className={styles.error}>{error}</p>}
         <Button type="submit" loading={loading}>כניסה</Button>
-        <div style={{ textAlign: "center", marginTop: "0.5rem" }}>
-          <Link to="/forgot-password" style={{ color: "var(--color-primary)", fontSize: "0.9rem" }}>
+        <div className={styles.footer}>
+          <Link to="/forgot-password" className={styles.forgotLink}>
             שכחת סיסמה?
           </Link>
         </div>

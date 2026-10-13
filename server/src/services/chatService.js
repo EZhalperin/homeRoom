@@ -2,6 +2,7 @@
 import * as studentRepository from "../repositories/studentRepository.js";
 import * as studentService from "./studentService.js";
 import * as notificationService from "./notificationService.js";
+import * as userRepository from "../repositories/userRepository.js";
 import { buildChatRoomDoc } from "../models/ChatRoom.js";
 import { buildChatMessageDoc } from "../models/ChatMessage.js";
 import { emitToRoom, isUserInRoom } from "../sockets/realtime.js";
@@ -84,7 +85,18 @@ export async function getOrCreateRoom(user, { studentUuid } = {}) {
     room = await chatRepository.createRoom(doc);
   }
 
-  return room;
+  let resolvedTeacherName = null;
+  if (room.teacherUserId) {
+    const teachers = await userRepository.findManyByUserIds([room.teacherUserId]);
+    if (teachers && teachers.length > 0) {
+      resolvedTeacherName = `${teachers[0].firstName || ""} ${teachers[0].lastName || ""}`.trim() || null;
+    }
+  }
+
+  return {
+    ...room,
+    teacherName: resolvedTeacherName,
+  };
 }
 
 /**
@@ -98,6 +110,12 @@ export async function listRooms(user) {
 
   const rooms = await chatRepository.listRoomsForUser(user.userId, user.role);
 
+  const teacherUserIds = Array.from(new Set(rooms.map((r) => r.teacherUserId).filter(Boolean)));
+  const teachers = await userRepository.findManyByUserIds(teacherUserIds);
+  const teacherMap = new Map(
+    teachers.map((t) => [t.userId, `${t.firstName || ""} ${t.lastName || ""}`.trim()]),
+  );
+
   const roomsWithUnread = await Promise.all(
     rooms.map(async (room) => {
       const lastRead = room.lastReadAt?.[user.role];
@@ -108,6 +126,7 @@ export async function listRooms(user) {
       });
       return {
         ...room,
+        teacherName: teacherMap.get(room.teacherUserId) || null,
         unreadCount,
       };
     }),

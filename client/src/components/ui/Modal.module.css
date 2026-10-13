@@ -1,12 +1,78 @@
-.dialog {
-  width: min(100% - 2rem, 30rem); padding: 0; border: 0;
-  border-radius: var(--radius-md); box-shadow: var(--shadow-md);
-  background: var(--color-surface); color: var(--color-text);
+﻿.dialog {
+  width: min(100% - 2rem, 32rem);
+  padding: 0;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-lg);
+  background-color: var(--color-surface);
+  color: var(--color-text);
+  animation: modalFadeIn var(--dur) var(--ease-out);
 }
-.dialog::backdrop { background: rgb(0 0 0 / 45%); }
-.body { padding: var(--space-4); display: grid; gap: var(--space-4); }
-.header { display: flex; justify-content: space-between; align-items: center; }
+
+.dialog::backdrop {
+  background: rgba(15, 23, 42, 0.5);
+  backdrop-filter: blur(2px);
+  animation: backdropFadeIn var(--dur) var(--ease-out);
+}
+
+@keyframes modalFadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.96) translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+@keyframes backdropFadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.body {
+  padding: var(--space-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-block-end: var(--space-2);
+  border-block-end: 1px solid var(--color-border);
+}
+
+.header h2 {
+  margin: 0;
+  font-size: var(--fs-md);
+  font-weight: 700;
+  color: var(--color-text);
+}
+
 .close {
-  width: var(--tap-target); height: var(--tap-target); border: 0; background: none;
-  font-size: 1.5rem; cursor: pointer; border-radius: var(--radius-sm);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--tap-target);
+  height: var(--tap-target);
+  border: 0;
+  background: none;
+  font-size: 1.25rem;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  border-radius: var(--radius-sm);
+  transition: background-color var(--dur-fast) var(--ease-out), color var(--dur-fast) var(--ease-out);
+}
+
+.close:hover {
+  background-color: var(--color-surface-hover);
+  color: var(--color-text);
 }

@@ -59,6 +59,9 @@ export default function RoomList({ rooms, selectedRoomId, onSelectRoom, onStartC
           rooms.map((room) => {
             const roomId = room._id || room.id;
             const isSelected = String(roomId) === String(selectedRoomId);
+            const displayName = isTeacher
+              ? room.studentName ? `הורי ${room.studentName}` : "שיחה"
+              : room.teacherName ? `המחנך/ת ${room.teacherName}` : (room.studentName ? `שיחה עם המורה (${room.studentName})` : "שיחה עם המורה");
 
             return (
               <button
@@ -67,9 +70,7 @@ export default function RoomList({ rooms, selectedRoomId, onSelectRoom, onStartC
                 onClick={() => onSelectRoom(room)}
               >
                 <div className={styles.topRow}>
-                  <span className={styles.studentName}>
-                    {room.studentName ? `הורי ${room.studentName}` : "שיחה"}
-                  </span>
+                  <span className={styles.studentName}>{displayName}</span>
                   {room.lastMessageAt && (
                     <span className={styles.time}>{formatRelativeTime(room.lastMessageAt)}</span>
                   )}

@@ -1,4 +1,4 @@
-import { z } from "zod";
+﻿import { z } from "zod";
 import { studentUuid } from "./common.js";
 import { mongoId } from "./classes.validator.js";
 
@@ -22,6 +22,12 @@ export const classStudentsParamSchema = z.object({
 export const deleteStudentSchema = z.object({
   params: z.object({
     classId: mongoId,
+    id: studentUuid,
+  }),
+});
+
+export const studentIdParamSchema = z.object({
+  params: z.object({
     id: studentUuid,
   }),
 });
