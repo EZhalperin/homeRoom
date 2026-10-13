@@ -1,18 +1,74 @@
+﻿import crypto from "node:crypto";
 import * as userRepository from "../repositories/userRepository.js";
 import { AppError } from "../utils/AppError.js";
-import { hashPassword, toPublicUser } from "./authService.js";
+import { hashPassword, toPublicUser, createInviteToken } from "./authService.js";
+import * as emailService from "./emailService.js";
+import { logger } from "../utils/logger.js";
 
 export async function registerUser({ userId, email, password, role, firstName, lastName }) {
+  const hasProvidedPassword = Boolean(password);
+  const passwordSet = hasProvidedPassword;
+  const rawPasswordToHash = hasProvidedPassword
+    ? password
+    : crypto.randomBytes(32).toString("hex");
+
   const created = await userRepository.insert({
     userId,
     email,
-    password: await hashPassword(password),
+    password: await hashPassword(rawPasswordToHash),
     role,
     firstName,
     lastName,
     isActive: true,
+    passwordSet,
   });
-  return toPublicUser(created);
+
+  const publicUser = toPublicUser(created);
+
+  if (!hasProvidedPassword) {
+    let inviteSent = false;
+    try {
+      const inviteToken = await createInviteToken(created.id);
+      await emailService.sendInviteEmail({
+        email: created.email,
+        firstName: created.firstName,
+        token: inviteToken,
+      });
+      inviteSent = true;
+    } catch (err) {
+      logger.error(`Failed to send invite email to ${created.email}:`, err);
+      inviteSent = false;
+    }
+
+    return {
+      ...publicUser,
+      inviteSent,
+    };
+  }
+
+  return {
+    ...publicUser,
+    inviteSent: false,
+  };
+}
+
+export async function sendInvite(id) {
+  const user = await userRepository.findById(id);
+  if (!user) {
+    throw new AppError("User not found", 404);
+  }
+  if (user.passwordSet === true) {
+    throw new AppError("User already has a password set", 409);
+  }
+
+  const inviteToken = await createInviteToken(user.id);
+  await emailService.sendInviteEmail({
+    email: user.email,
+    firstName: user.firstName,
+    token: inviteToken,
+  });
+
+  return { message: "Invite email sent successfully" };
 }
 
 export async function listUsers({ role, isActive, fullName } = {}) {
@@ -49,7 +105,10 @@ export async function updateMe(userId, { password, firstName, lastName, email })
   if (firstName !== undefined) patch.firstName = firstName;
   if (lastName !== undefined) patch.lastName = lastName;
   if (email !== undefined) patch.email = email;
-  if (password !== undefined) patch.password = await hashPassword(password);
+  if (password !== undefined) {
+    patch.password = await hashPassword(password);
+    patch.passwordSet = true;
+  }
   const updated = await userRepository.updateByUserId(userId, patch);
   return toPublicUser(updated);
 }

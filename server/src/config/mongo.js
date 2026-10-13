@@ -1,7 +1,8 @@
-import { MongoClient } from "mongodb";
+﻿import { MongoClient } from "mongodb";
 import { env } from "./env.js";
 import { logger } from "../utils/logger.js";
 import { COLLECTION } from "../models/Class.js";
+import { COLLECTION as PASSWORD_TOKENS_COLLECTION } from "../models/PasswordToken.js";
 
 /** @type {MongoClient|null} */
 let client = null;
@@ -122,6 +123,22 @@ export async function ensureIndexes() {
       unique: true,
       partialFilterExpression: { isActive: true, "students.studentId": { $exists: true } },
     },
+  );
+
+  const passwordTokens = getCollection(PASSWORD_TOKENS_COLLECTION);
+  await passwordTokens.createIndex(
+    { tokenHash: 1 },
+    { name: "uniq_token_hash", unique: true },
+  );
+
+  await passwordTokens.createIndex(
+    { userId: 1, purpose: 1 },
+    { name: "idx_user_id_purpose" },
+  );
+
+  await passwordTokens.createIndex(
+    { expiresAt: 1 },
+    { name: "ttl_expires_at", expireAfterSeconds: 0 },
   );
 
   logger.info("MongoDB indexes ensured");

@@ -1,4 +1,4 @@
-import { z } from "zod";
+﻿import { z } from "zod";
 
 /** Query-string booleans. Never use `z.coerce.boolean()` ("false" would become true). */
 export const queryBoolean = z.stringbool();
@@ -20,3 +20,11 @@ export const userIdParamSchema = z.object({
     id: userUuid,
   }),
 });
+
+/** Shared password policy: min 8, max 72 (bcrypt limit), at least one letter and one digit. */
+export const passwordSchema = z
+  .string()
+  .min(8, "Password must be at least 8 characters")
+  .max(72, "Password must be at most 72 characters")
+  .regex(/[A-Za-z]/, "Password must contain at least one letter")
+  .regex(/[0-9]/, "Password must contain at least one digit");

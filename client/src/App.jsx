@@ -30,7 +30,6 @@ import RiskAlerts from "./pages/teacher/RiskAlerts.jsx";
 import ChildOverview from "./pages/parent/ChildOverview.jsx";
 import ParentForms from "./pages/parent/Forms.jsx";
 import Schedule from "./pages/parent/Schedule.jsx";
-import ReportAbsence from "./pages/parent/ReportAbsence.jsx";
 
 function HomeRedirect() {
   const { user } = useAuth();
@@ -78,7 +77,6 @@ export default function App() {
             <Route index element={<ChildOverview />} />
             <Route path="forms" element={<ParentForms />} />
             <Route path="schedule" element={<Schedule />} />
-            <Route path="report-absence" element={<ReportAbsence />} />
             <Route path="chat" element={<Chat />} />
             <Route path="profile" element={<Profile />} />
           </Route>

@@ -1,5 +1,5 @@
-import { z } from "zod";
-import { emailSchema, queryBoolean, userIdParamSchema, userUuid } from "./common.js";
+﻿import { z } from "zod";
+import { emailSchema, passwordSchema, queryBoolean, userIdParamSchema, userUuid } from "./common.js";
 
 const roleEnum = z.enum(["admin", "teacher", "parent"]);
 
@@ -9,7 +9,7 @@ export const registerUserSchema = z.object({
   body: z.object({
     userId: z.string().trim().min(1, "userId is required"),
     email: emailSchema,
-    password: z.string().min(8, "password must be at least 8 characters"),
+    password: passwordSchema.optional(),
     role: roleEnum,
     firstName: z.string().trim().min(1, "firstName is required"),
     lastName: z.string().trim().min(1, "lastName is required"),

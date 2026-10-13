@@ -1,4 +1,4 @@
-import { asyncHandler } from "../utils/asyncHandler.js";
+﻿import { asyncHandler } from "../utils/asyncHandler.js";
 import * as userService from "../services/userService.js";
 
 export const updateMe = asyncHandler(async (req, res) => {
@@ -19,14 +19,26 @@ export const updateMe = asyncHandler(async (req, res) => {
 
 export const registerUser = asyncHandler(async (req, res) => {
   const pub = await userService.registerUser(req.validated.body);
+  const message =
+    pub.inviteSent === false && !req.validated.body.password
+      ? "User registered, but failed to send invitation email"
+      : "User registered successfully";
+
   res.status(201).json({
-    message: "User registered successfully",
+    message,
     userId: pub.userId,
     email: pub.email,
     role: pub.role,
     firstName: pub.firstName,
     lastName: pub.lastName,
+    passwordSet: pub.passwordSet,
+    inviteSent: pub.inviteSent,
   });
+});
+
+export const sendInvite = asyncHandler(async (req, res) => {
+  const result = await userService.sendInvite(req.validated.params.id);
+  res.json(result);
 });
 
 export const getUsers = asyncHandler(async (req, res) => {

@@ -1,9 +1,9 @@
-import { supabase } from "../config/supabase.js";
+﻿import { supabase } from "../config/supabase.js";
 import { AppError } from "../utils/AppError.js";
 import { logger } from "../utils/logger.js";
 
 const TABLE = "users";
-const PUBLIC_COLUMNS = "id, userId, email, role, firstName, lastName, isActive";
+const PUBLIC_COLUMNS = "id, userId, email, role, firstName, lastName, isActive, passwordSet";
 
 /**
  * Maps PostgREST / Postgres errors to AppError. Never returns the raw driver error.
@@ -48,6 +48,17 @@ export async function findByUserId(userId, { includePassword = false } = {}) {
 export async function findById(id, { includePassword = false } = {}) {
   const columns = includePassword ? `${PUBLIC_COLUMNS}, password` : PUBLIC_COLUMNS;
   const { data, error } = await supabase.from(TABLE).select(columns).eq("id", id).maybeSingle();
+  throwIfSupabaseError(error);
+  return data;
+}
+
+export async function findByEmail(email, { includePassword = false } = {}) {
+  const columns = includePassword ? `${PUBLIC_COLUMNS}, password` : PUBLIC_COLUMNS;
+  const { data, error } = await supabase
+    .from(TABLE)
+    .select(columns)
+    .ilike("email", email.trim())
+    .maybeSingle();
   throwIfSupabaseError(error);
   return data;
 }
