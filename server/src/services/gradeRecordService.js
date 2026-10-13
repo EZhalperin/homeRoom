@@ -1,4 +1,5 @@
-import * as gradeRepository from "../repositories/gradeRepository.js";
+﻿import * as gradeRepository from "../repositories/gradeRepository.js";
+import * as notificationService from "./notificationService.js";
 import { buildGradeDoc } from "../models/Class.js";
 import { recomputeForStudent, resolveTeacherStudent } from "./studentService.js";
 
@@ -8,12 +9,24 @@ import { recomputeForStudent, resolveTeacherStudent } from "./studentService.js"
  */
 
 export async function addGrade({ teacherUserId, studentUuid, subject, taskName, score, weight, date }) {
-  await resolveTeacherStudent(teacherUserId, studentUuid);
+  const { student } = await resolveTeacherStudent(teacherUserId, studentUuid);
   await gradeRepository.addGrade(
     studentUuid,
     buildGradeDoc({ subject, taskName, score, weight, date }),
   );
   await recomputeForStudent(studentUuid);
+
+  // Trigger: notify that student's parent
+  if (student.studentId) {
+    await notificationService.createMany([student.studentId], {
+      type: "grade",
+      title: "ציון חדש הוזן",
+      body: `הוזן ציון חדש במקצוע ${subject}: ${score}`,
+      link: "/parent",
+      data: { studentUuid, subject, taskName, score },
+    });
+  }
+
   return { id: studentUuid, subject, taskName, score, weight, date };
 }
 

@@ -1,4 +1,4 @@
-import { getCollection } from "../config/mongo.js";
+﻿import { getCollection } from "../config/mongo.js";
 import { COLLECTION, buildClassDoc } from "../models/Class.js";
 import { AppError } from "../utils/AppError.js";
 import { escapeRegex } from "../utils/escapeRegex.js";
@@ -84,4 +84,15 @@ export async function findStudentsByClassId(classId) {
     { projection: { students: 1 } },
   );
   return doc ? doc.students || [] : null;
+}
+
+/**
+ * Returns active classes with full document content (including students).
+ * @param {object} [filter]
+ * @returns {Promise<object[]>}
+ */
+export async function listActiveClasses(filter = {}) {
+  const query = { isActive: true, ...filter };
+  const docs = await col().find(query).toArray();
+  return docs.map(serialize);
 }

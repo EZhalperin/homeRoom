@@ -8,6 +8,9 @@ export const userUuid = z.uuid({ error: "id must be a UUID" });
 
 export const studentUuid = z.uuid({ error: "id must be a UUID" });
 
+/** MongoDB 24-hex-char ObjectId. */
+export const mongoObjectId = z.string().regex(/^[a-f\d]{24}$/i, { message: "id must be an ObjectId" });
+
 /** Trim + lowercase, then validate as an email. */
 export const emailSchema = z
   .string()

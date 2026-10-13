@@ -1,4 +1,4 @@
-import { Navigate, Route, Routes } from "react-router-dom";
+﻿import { Navigate, Route, Routes } from "react-router-dom";
 import { useAuth } from "./hooks/useAuth.js";
 import ProtectedRoute from "./routes/ProtectedRoute.jsx";
 import RoleRoute from "./routes/RoleRoute.jsx";
@@ -26,10 +26,12 @@ import Grades from "./pages/teacher/Grades.jsx";
 import Attendance from "./pages/teacher/Attendance.jsx";
 import TeacherForms from "./pages/teacher/Forms.jsx";
 import RiskAlerts from "./pages/teacher/RiskAlerts.jsx";
+import TeacherAnnouncements from "./pages/teacher/Announcements.jsx";
 
 import ChildOverview from "./pages/parent/ChildOverview.jsx";
 import ParentForms from "./pages/parent/Forms.jsx";
 import Schedule from "./pages/parent/Schedule.jsx";
+import ParentAnnouncements from "./pages/parent/Announcements.jsx";
 
 function HomeRedirect() {
   const { user } = useAuth();
@@ -48,6 +50,7 @@ export default function App() {
       <Route element={<ProtectedRoute />}>
         <Route path="/" element={<HomeRedirect />} />
 
+        {/* Global /notifications redirect according to role */}
         <Route element={<RoleRoute roles={["admin"]} />}>
           <Route path="/admin" element={<AdminLayout />}>
             <Route index element={<Dashboard />} />
@@ -63,11 +66,13 @@ export default function App() {
         <Route element={<RoleRoute roles={["teacher"]} />}>
           <Route path="/teacher" element={<TeacherLayout />}>
             <Route index element={<MyClass />} />
+            <Route path="announcements" element={<TeacherAnnouncements />} />
             <Route path="grades" element={<Grades />} />
             <Route path="attendance" element={<Attendance />} />
             <Route path="forms" element={<TeacherForms />} />
             <Route path="risk" element={<RiskAlerts />} />
             <Route path="chat" element={<Chat />} />
+            <Route path="notifications" element={<Notifications />} />
             <Route path="profile" element={<Profile />} />
           </Route>
         </Route>
@@ -75,9 +80,11 @@ export default function App() {
         <Route element={<RoleRoute roles={["parent"]} />}>
           <Route path="/parent" element={<ParentLayout />}>
             <Route index element={<ChildOverview />} />
+            <Route path="announcements" element={<ParentAnnouncements />} />
             <Route path="forms" element={<ParentForms />} />
             <Route path="schedule" element={<Schedule />} />
             <Route path="chat" element={<Chat />} />
+            <Route path="notifications" element={<Notifications />} />
             <Route path="profile" element={<Profile />} />
           </Route>
         </Route>

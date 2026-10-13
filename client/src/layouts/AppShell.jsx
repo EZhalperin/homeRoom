@@ -1,7 +1,8 @@
-import { useEffect, useState } from "react";
+﻿import { useEffect, useState } from "react";
 import { NavLink, Outlet, useLocation } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth.js";
 import Button from "../components/ui/Button.jsx";
+import NotificationBell from "../components/domain/NotificationBell.jsx";
 import { ROLE_LABEL } from "../utils/constants.js";
 import styles from "./AppShell.module.css";
 
@@ -38,6 +39,7 @@ export default function AppShell({ nav, bottomNav = false }) {
         )}
         <span className={styles.brand}>HomeRoom</span>
         <span className={styles.user}>{user.firstName} {user.lastName} · {ROLE_LABEL[user.role]}</span>
+        <NotificationBell />
         <Button variant="ghost" onClick={logout}>יציאה</Button>
       </header>
 

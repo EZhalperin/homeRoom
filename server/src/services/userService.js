@@ -4,6 +4,7 @@ import { AppError } from "../utils/AppError.js";
 import { hashPassword, toPublicUser, createInviteToken } from "./authService.js";
 import * as emailService from "./emailService.js";
 import { logger } from "../utils/logger.js";
+import { disconnectUser } from "../sockets/realtime.js";
 
 export async function registerUser({ userId, email, password, role, firstName, lastName }) {
   const hasProvidedPassword = Boolean(password);
@@ -97,6 +98,9 @@ export async function updateUser(id, patch, { actorId }) {
     throw new AppError("An admin cannot suspend themselves", 403);
   }
   const updated = await userRepository.updateById(id, patch);
+  if (patch.isActive === false && updated?.userId) {
+    disconnectUser(updated.userId);
+  }
   return toPublicUser(updated);
 }
 
@@ -122,5 +126,8 @@ export async function suspendUser(id, { actorId }) {
     throw new AppError("An admin cannot delete themselves", 403);
   }
   const updated = await userRepository.updateById(id, { isActive: false });
+  if (updated?.userId) {
+    disconnectUser(updated.userId);
+  }
   return toPublicUser(updated);
 }

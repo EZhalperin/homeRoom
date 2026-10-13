@@ -1,0 +1,118 @@
+﻿.container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background-color: var(--color-surface);
+  border-inline-end: 1px solid var(--color-border);
+  min-width: 280px;
+}
+
+.header {
+  padding: var(--space-4);
+  border-block-end: 1px solid var(--color-border);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.title {
+  margin: 0;
+  font-size: var(--fs-lg);
+  font-weight: 700;
+  color: var(--color-text);
+}
+
+.newChatBox {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin-block-start: var(--space-2);
+}
+
+.list {
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+.roomItem {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  padding: var(--space-3) var(--space-4);
+  border: none;
+  border-block-end: 1px solid var(--color-border);
+  background: none;
+  text-align: start;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+  color: var(--color-text);
+  width: 100%;
+}
+
+.roomItem:hover {
+  background-color: var(--color-primary-soft);
+}
+
+.activeRoom {
+  background-color: var(--color-primary-soft);
+  border-inline-start: 4px solid var(--color-primary);
+}
+
+.topRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+}
+
+.studentName {
+  font-weight: 600;
+  font-size: var(--fs-md);
+  color: var(--color-text);
+}
+
+.time {
+  font-size: 0.75rem;
+  color: var(--color-text-muted);
+  white-space: nowrap;
+}
+
+.bottomRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+}
+
+.preview {
+  margin: 0;
+  font-size: var(--fs-sm);
+  color: var(--color-text-muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 180px;
+}
+
+.unreadBadge {
+  min-width: 20px;
+  height: 20px;
+  padding-inline: 6px;
+  border-radius: var(--radius-pill);
+  background-color: var(--color-primary);
+  color: #fff;
+  font-size: 0.75rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.empty {
+  padding: var(--space-6);
+  text-align: center;
+  color: var(--color-text-muted);
+  font-size: var(--fs-sm);
+}
