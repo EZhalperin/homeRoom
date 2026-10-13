@@ -1,5 +1,5 @@
-import { z } from "zod";
-import { emailSchema } from "./common.js";
+﻿import { z } from "zod";
+import { emailSchema, passwordSchema } from "./common.js";
 
 export {
   registerUserSchema,
@@ -11,7 +11,7 @@ export {
 export const updateMeSchema = z.object({
   body: z
     .object({
-      password: z.string().min(8, "password must be at least 8 characters").optional(),
+      password: passwordSchema.optional(),
       firstName: z.string().trim().min(1).optional(),
       lastName: z.string().trim().min(1).optional(),
       email: emailSchema.optional(),

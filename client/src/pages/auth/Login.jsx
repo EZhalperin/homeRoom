@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { Navigate, useLocation, useNavigate } from "react-router-dom";
+﻿import { useState } from "react";
+import { Navigate, useLocation, useNavigate, Link } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth.js";
 import Card from "../../components/ui/Card.jsx";
 import Input from "../../components/ui/Input.jsx";
@@ -38,12 +38,29 @@ export default function Login() {
   return (
     <Card title="התחברות">
       <form className="stack" onSubmit={onSubmit}>
-        <Input label="תעודת זהות" value={userId} onChange={(e) => setUserId(e.target.value)}
-          autoComplete="username" inputMode="numeric" required />
-        <Input label="סיסמה" type="password" value={password} onChange={(e) => setPassword(e.target.value)}
-          autoComplete="current-password" required />
+        <Input
+          label="תעודת זהות"
+          value={userId}
+          onChange={(e) => setUserId(e.target.value)}
+          autoComplete="username"
+          inputMode="numeric"
+          required
+        />
+        <Input
+          label="סיסמה"
+          type="password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          autoComplete="current-password"
+          required
+        />
         {error && <p role="alert" style={{ color: "var(--color-danger)" }}>{error}</p>}
         <Button type="submit" loading={loading}>כניסה</Button>
+        <div style={{ textAlign: "center", marginTop: "0.5rem" }}>
+          <Link to="/forgot-password" style={{ color: "var(--color-primary)", fontSize: "0.9rem" }}>
+            שכחת סיסמה?
+          </Link>
+        </div>
       </form>
     </Card>
   );

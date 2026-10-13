@@ -1,4 +1,4 @@
-import { useState } from "react";
+﻿import { useState } from "react";
 import { useAuth } from "../../hooks/useAuth.js";
 import { useApiMutation } from "../../hooks/useApiMutation.js";
 import { updateMe } from "../../api/users.js";
@@ -14,7 +14,11 @@ export default function Profile() {
     email: user?.email ?? "",
     password: "",
   });
-  const set = (k) => (e) => setForm((f) => ({ ...f, [k]: e.target.value }));
+  const [passwordError, setPasswordError] = useState("");
+  const set = (k) => (e) => {
+    if (k === "password") setPasswordError("");
+    setForm((f) => ({ ...f, [k]: e.target.value }));
+  };
 
   const save = useApiMutation(updateMe, {
     success: "הפרופיל עודכן",
@@ -25,11 +29,25 @@ export default function Profile() {
         email: data.email,
       });
       setForm((f) => ({ ...f, password: "" }));
+      setPasswordError("");
     },
   });
 
   function onSubmit(e) {
     e.preventDefault();
+    setPasswordError("");
+
+    if (form.password) {
+      if (form.password.length < 8 || form.password.length > 72) {
+        setPasswordError("הסיסמה חייבת להכיל בין 8 ל-72 תווים");
+        return;
+      }
+      if (!/[A-Za-z]/.test(form.password) || !/[0-9]/.test(form.password)) {
+        setPasswordError("הסיסמה חייבת לכלול לפחות אות אחת באנגלית וספרה אחת");
+        return;
+      }
+    }
+
     const body = {};
     if (form.firstName !== user?.firstName) body.firstName = form.firstName;
     if (form.lastName !== user?.lastName) body.lastName = form.lastName;
@@ -47,8 +65,19 @@ export default function Profile() {
           <Input label="אימייל" type="email" value={form.email} onChange={set("email")} required />
           <Input label="שם פרטי" value={form.firstName} onChange={set("firstName")} required />
           <Input label="שם משפחה" value={form.lastName} onChange={set("lastName")} required />
-          <Input label="סיסמה חדשה (השאר ריק ללא שינוי)" type="password" value={form.password}
-            onChange={set("password")} autoComplete="new-password" />
+          <div>
+            <Input
+              label="סיסמה חדשה (השאר ריק ללא שינוי)"
+              type="password"
+              value={form.password}
+              onChange={set("password")}
+              autoComplete="new-password"
+              error={passwordError}
+            />
+            <small style={{ color: "var(--color-muted)", fontSize: "0.8rem", display: "block", marginTop: "0.25rem" }}>
+              מדיניות סיסמה: 8–72 תווים, כולל לפחות אות אחת וספרה אחת.
+            </small>
+          </div>
           <Button type="submit" loading={save.isPending}>שמירה</Button>
         </form>
       </Card>

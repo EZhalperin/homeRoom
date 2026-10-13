@@ -1,7 +1,8 @@
-import { useState } from "react";
+﻿import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { adminListUsers, adminRegister, adminUpdateUser } from "../../api/users.js";
+import { adminListUsers, adminRegister, adminUpdateUser, adminSendInvite } from "../../api/users.js";
 import { useApiMutation } from "../../hooks/useApiMutation.js";
+import { useToast } from "../../components/ui/Toast.jsx";
 import Input from "../../components/ui/Input.jsx";
 import Select from "../../components/ui/Select.jsx";
 import Button from "../../components/ui/Button.jsx";
@@ -14,6 +15,8 @@ import { fullName } from "../../utils/formatters.js";
 
 function UserForm({ user, onDone }) {
   const isNew = !user.id;
+  const toast = useToast();
+  const [sendInvite, setSendInvite] = useState(true);
   const [f, setF] = useState({
     userId: user.userId ?? "",
     email: user.email ?? "",
@@ -26,13 +29,33 @@ function UserForm({ user, onDone }) {
 
   const save = useApiMutation(
     (body) => (isNew ? adminRegister(body) : adminUpdateUser(user.id, body)),
-    { invalidate: [["adminUsers"]], success: isNew ? "המשתמש נוצר" : "המשתמש עודכן", onSuccess: onDone },
+    {
+      invalidate: [["adminUsers"]],
+      onSuccess: (data) => {
+        if (isNew) {
+          if (data?.inviteSent === true) {
+            toast.success("המשתמש נוצר וההזמנה נשלחה במייל בהצלחה");
+          } else if (data?.inviteSent === false && !f.password) {
+            toast.error("המשתמש נוצר, אך שליחת ההזמנה במייל נכשלה");
+          } else {
+            toast.success("המשתמש נוצר בהצלחה");
+          }
+        } else {
+          toast.success("המשתמש עודכן");
+        }
+        onDone();
+      },
+    },
   );
 
   function onSubmit(e) {
     e.preventDefault();
     if (isNew) {
-      save.mutate(f);
+      const payload = { ...f };
+      if (sendInvite) {
+        delete payload.password;
+      }
+      save.mutate(payload);
     } else {
       save.mutate({
         email: f.email,
@@ -47,7 +70,32 @@ function UserForm({ user, onDone }) {
     <form className="stack" onSubmit={onSubmit}>
       {isNew && <Input label="תעודת זהות" value={f.userId} onChange={set("userId")} required />}
       <Input label="אימייל" type="email" value={f.email} onChange={set("email")} required />
-      {isNew && <Input label="סיסמה ראשונית" type="password" value={f.password} onChange={set("password")} autoComplete="new-password" required minLength={8} />}
+
+      {isNew && (
+        <div style={{ marginBlock: "0.25rem" }}>
+          <label style={{ display: "flex", alignItems: "center", gap: "0.5rem", cursor: "pointer" }}>
+            <input
+              type="checkbox"
+              checked={sendInvite}
+              onChange={(e) => setSendInvite(e.target.checked)}
+            />
+            <span>שלח הזמנה במייל להגדרת סיסמה</span>
+          </label>
+        </div>
+      )}
+
+      {isNew && !sendInvite && (
+        <Input
+          label="סיסמה ראשונית"
+          type="password"
+          value={f.password}
+          onChange={set("password")}
+          autoComplete="new-password"
+          required
+          minLength={8}
+        />
+      )}
+
       <Input label="שם פרטי" value={f.firstName} onChange={set("firstName")} required />
       <Input label="שם משפחה" value={f.lastName} onChange={set("lastName")} required />
       <Select label="תפקיד" value={f.role} onChange={set("role")}>
@@ -71,6 +119,11 @@ export default function Users() {
   const toggle = useApiMutation((u) => adminUpdateUser(u.id, { isActive: !u.isActive }), {
     invalidate: [["adminUsers"]],
     success: "הסטטוס עודכן",
+  });
+
+  const sendInviteMutation = useApiMutation((id) => adminSendInvite(id), {
+    invalidate: [["adminUsers"]],
+    success: "ההזמנה נשלחה מחדש בהצלחה",
   });
 
   const setFilter = (k) => (e) => setFilters((f) => ({ ...f, [k]: e.target.value }));
@@ -118,12 +171,29 @@ export default function Users() {
                   <td data-label='ת"ז'>{u.userId}</td>
                   <td data-label="אימייל">{u.email}</td>
                   <td data-label="תפקיד">{ROLE_LABEL[u.role]}</td>
-                  <td data-label="סטטוס"><Badge tone={u.isActive ? "success" : "danger"}>{u.isActive ? "פעיל" : "מושעה"}</Badge></td>
+                  <td data-label="סטטוס">
+                    <div style={{ display: "flex", gap: "0.25rem", flexWrap: "wrap", alignItems: "center" }}>
+                      <Badge tone={u.isActive ? "success" : "danger"}>{u.isActive ? "פעיל" : "מושעה"}</Badge>
+                      {u.passwordSet === false && <Badge tone="warning">ממתין להגדרה</Badge>}
+                    </div>
+                  </td>
                   <td>
                     <div className="row">
+                      {u.passwordSet === false && (
+                        <Button
+                          variant="secondary"
+                          loading={sendInviteMutation.isPending && sendInviteMutation.variables === u.id}
+                          onClick={() => sendInviteMutation.mutate(u.id)}
+                        >
+                          שלח הזמנה מחדש
+                        </Button>
+                      )}
                       <Button variant="secondary" onClick={() => setEditing(u)}>עריכה</Button>
-                      <Button variant={u.isActive ? "danger" : "secondary"} loading={toggle.isPending && toggle.variables?.id === u.id}
-                        onClick={() => toggle.mutate(u)}>
+                      <Button
+                        variant={u.isActive ? "danger" : "secondary"}
+                        loading={toggle.isPending && toggle.variables?.id === u.id}
+                        onClick={() => toggle.mutate(u)}
+                      >
                         {u.isActive ? "השעיה" : "הפעלה"}
                       </Button>
                     </div>
