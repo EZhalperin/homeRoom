@@ -14,3 +14,8 @@ export async function deleteAnnouncement(id) {
   const res = await api.delete(`/announcements/${id}`);
   return res.data;
 }
+
+export async function getAudienceStats() {
+  const res = await api.get("/announcements/audience-stats");
+  return res.data;
+}

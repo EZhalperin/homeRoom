@@ -30,6 +30,18 @@
   color: #ffffff;
 }
 
+.heroLogo {
+  height: 48px;
+  width: auto;
+  max-width: 64px;
+  object-fit: contain;
+  flex-shrink: 0;
+  background-color: rgba(255, 255, 255, 0.95);
+  padding: 4px;
+  border-radius: var(--radius-sm);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
 .brandName {
   font-size: var(--fs-2xl);
   font-weight: 800;
@@ -91,14 +103,22 @@
 
 .mobileBrand {
   display: flex;
-  flex-direction: column;
   align-items: center;
-  gap: var(--space-1);
+  justify-content: center;
+  gap: var(--space-2);
   margin-block-end: var(--space-6);
 }
 
 .mobileLogo {
   color: var(--color-primary);
+}
+
+.mobileLogoImg {
+  height: 40px;
+  width: auto;
+  max-width: 52px;
+  object-fit: contain;
+  flex-shrink: 0;
 }
 
 .mobileTitle {

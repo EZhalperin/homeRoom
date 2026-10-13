@@ -41,6 +41,15 @@
   flex-shrink: 0;
 }
 
+.brandLogo {
+  height: 32px;
+  width: auto;
+  max-width: 44px;
+  object-fit: contain;
+  flex-shrink: 0;
+  border-radius: var(--radius-xs);
+}
+
 .brandText {
   font-weight: 700;
   font-size: var(--fs-lg);

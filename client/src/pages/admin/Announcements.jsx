@@ -1,7 +1,14 @@
 ﻿import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { getAnnouncements, createAnnouncement, deleteAnnouncement } from "../../api/announcements.js";
+import { Users, GraduationCap } from "lucide-react";
+import {
+  getAnnouncements,
+  createAnnouncement,
+  deleteAnnouncement,
+  getAudienceStats,
+} from "../../api/announcements.js";
 import AnnouncementCard from "../../components/domain/AnnouncementCard.jsx";
 import AnnouncementForm from "../../components/domain/AnnouncementForm.jsx";
+import StatCard from "../../components/ui/StatCard.jsx";
 import Spinner from "../../components/ui/Spinner.jsx";
 import EmptyState from "../../components/ui/EmptyState.jsx";
 import { useToast } from "../../components/ui/Toast.jsx";
@@ -13,6 +20,11 @@ export default function AdminAnnouncements() {
   const { data, isLoading } = useQuery({
     queryKey: ["announcements"],
     queryFn: () => getAnnouncements(),
+  });
+
+  const { data: audienceStats } = useQuery({
+    queryKey: ["announcement-audience-stats"],
+    queryFn: () => getAudienceStats(),
   });
 
   const createMutation = useMutation({
@@ -47,6 +59,24 @@ export default function AdminAnnouncements() {
           פרסום וניהול הודעות כלליות לכלל בית הספר, לצוות המורים ולהורים.
         </p>
       </header>
+
+      {/* Audience Overview Counters */}
+      <div className="grid grid-2">
+        <StatCard
+          title="סה״כ הורים במערכת"
+          value={audienceStats?.parentsCount ?? 0}
+          icon={Users}
+          tone="primary"
+          subtext="משתמשי הורים רשומים"
+        />
+        <StatCard
+          title="סה״כ תלמידים במערכת"
+          value={audienceStats?.studentsCount ?? 0}
+          icon={GraduationCap}
+          tone="primary"
+          subtext="תלמידים בכיתות הפעילות"
+        />
+      </div>
 
       <AnnouncementForm
         onSubmit={(payload, reset) => {

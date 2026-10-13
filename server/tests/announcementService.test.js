@@ -12,6 +12,11 @@ const mockClassRepo = {
   findById: jest.fn(),
   findActiveByTeacherId: jest.fn(),
   listActiveClasses: jest.fn(),
+  countActiveStudents: jest.fn().mockResolvedValue(30),
+};
+
+const mockUserRepo = {
+  countAudienceStats: jest.fn().mockResolvedValue({ parentsCount: 25, studentsCount: 0 }),
 };
 
 const mockStudentRepo = {
@@ -31,6 +36,7 @@ const mockRealtime = {
 jest.unstable_mockModule("../src/repositories/announcementRepository.js", () => mockAnnouncementRepo);
 jest.unstable_mockModule("../src/repositories/classRepository.js", () => mockClassRepo);
 jest.unstable_mockModule("../src/repositories/studentRepository.js", () => mockStudentRepo);
+jest.unstable_mockModule("../src/repositories/userRepository.js", () => mockUserRepo);
 jest.unstable_mockModule("../src/services/notificationService.js", () => mockNotificationService);
 jest.unstable_mockModule("../src/sockets/realtime.js", () => mockRealtime);
 
@@ -341,6 +347,16 @@ describe("announcementService & Realtime Triggers", () => {
 
       await studentService.recomputeForStudent("uuid-2");
       expect(mockNotificationService.createMany).not.toHaveBeenCalled();
+    });
+  });
+
+  describe("getAudienceStats", () => {
+    test("returns parentsCount and studentsCount from repository fallback", async () => {
+      mockUserRepo.countAudienceStats.mockResolvedValue({ parentsCount: 25, studentsCount: 0 });
+      mockClassRepo.countActiveStudents.mockResolvedValue(30);
+
+      const stats = await announcementService.getAudienceStats();
+      expect(stats).toEqual({ parentsCount: 25, studentsCount: 30 });
     });
   });
 });

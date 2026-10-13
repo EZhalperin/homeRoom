@@ -15,3 +15,8 @@ export const deleteAnnouncement = asyncHandler(async (req, res) => {
   const result = await announcementService.deleteAnnouncement(req.validated.params.id, req.user);
   res.json(result);
 });
+
+export const getAudienceStats = asyncHandler(async (req, res) => {
+  const stats = await announcementService.getAudienceStats();
+  res.json(stats);
+});

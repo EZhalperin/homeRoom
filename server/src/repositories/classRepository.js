@@ -96,3 +96,18 @@ export async function listActiveClasses(filter = {}) {
   const docs = await col().find(query).toArray();
   return docs.map(serialize);
 }
+
+/**
+ * Returns total count of students across all active classes.
+ * @returns {Promise<number>}
+ */
+export async function countActiveStudents() {
+  const docs = await col().find({ isActive: true }, { projection: { students: 1 } }).toArray();
+  let count = 0;
+  for (const doc of docs) {
+    if (Array.isArray(doc.students)) {
+      count += doc.students.length;
+    }
+  }
+  return count;
+}

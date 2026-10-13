@@ -1,5 +1,5 @@
 ﻿import { Outlet } from "react-router-dom";
-import { GraduationCap, CheckCircle2 } from "lucide-react";
+import { CheckCircle2 } from "lucide-react";
 import styles from "./AuthLayout.module.css";
 
 export default function AuthLayout() {
@@ -7,7 +7,7 @@ export default function AuthLayout() {
     <div className={styles.wrap}>
       <aside className={styles.brandPanel} aria-hidden="true">
         <div className={styles.brandHeader}>
-          <GraduationCap size={36} className={styles.brandLogo} />
+          <img src="/logo.png" alt="לוגו בית הספר" className={styles.heroLogo} />
           <span className={styles.brandName}>HomeRoom</span>
         </div>
 
@@ -38,7 +38,7 @@ export default function AuthLayout() {
 
       <section className={styles.formPanel}>
         <div className={styles.mobileBrand}>
-          <GraduationCap size={40} className={styles.mobileLogo} />
+          <img src="/logo.png" alt="לוגו בית הספר" className={styles.mobileLogoImg} />
           <h2 className={styles.mobileTitle}>HomeRoom</h2>
         </div>
         <div className={styles.formBox}>

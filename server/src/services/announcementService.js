@@ -1,4 +1,5 @@
-﻿import * as announcementRepository from "../repositories/announcementRepository.js";
+﻿import * as userRepository from "../repositories/userRepository.js";
+import * as announcementRepository from "../repositories/announcementRepository.js";
 import * as classRepository from "../repositories/classRepository.js";
 import * as studentRepository from "../repositories/studentRepository.js";
 import * as notificationService from "./notificationService.js";
@@ -208,4 +209,21 @@ export async function deleteAnnouncement(id, user) {
 
   await announcementRepository.deleteById(id);
   return { message: "Announcement deleted successfully" };
+}
+
+/**
+ * Returns audience totals for parents and students.
+ * @returns {Promise<{ parentsCount: number, studentsCount: number }>}
+ */
+export async function getAudienceStats() {
+  const userStats = await userRepository.countAudienceStats();
+  let studentsCount = userStats.studentsCount;
+  if (studentsCount === 0) {
+    const mongoCount = await classRepository.countActiveStudents();
+    studentsCount = mongoCount;
+  }
+  return {
+    parentsCount: userStats.parentsCount,
+    studentsCount,
+  };
 }

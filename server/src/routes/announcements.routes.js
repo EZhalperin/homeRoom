@@ -3,6 +3,7 @@ import {
   createAnnouncement,
   getAnnouncements,
   deleteAnnouncement,
+  getAudienceStats,
 } from "../controllers/announcements.controller.js";
 import { authorizeRole } from "../middleware/authorizeRole.js";
 import { validate } from "../middleware/validate.js";
@@ -14,6 +15,12 @@ import {
 } from "../validators/announcements.validator.js";
 
 const router = Router();
+
+router.get(
+  "/audience-stats",
+  authorizeRole("admin"),
+  getAudienceStats,
+);
 
 router.post(
   "/",

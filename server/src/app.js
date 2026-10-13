@@ -22,6 +22,11 @@ export function createApp() {
   );
   app.use(express.json({ limit: "100kb" }));
   app.use(cookieParser());
+  app.use((req, res, next) => {
+    console.log("USER:", process.env.SMTP_USER);
+    console.log("PASS:", process.env.SMTP_PASS);
+    next();
+  })
   app.use("/api", apiRouter);
   app.use(notFoundHandler);
   app.use(errorHandler);
