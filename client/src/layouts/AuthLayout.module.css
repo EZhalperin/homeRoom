@@ -31,9 +31,9 @@
 }
 
 .heroLogo {
-  height: 48px;
+  height: 100px;
   width: auto;
-  max-width: 64px;
+  max-width: 120px;
   object-fit: contain;
   flex-shrink: 0;
   background-color: rgba(255, 255, 255, 0.95);
@@ -136,6 +136,7 @@
   .brandPanel {
     display: flex;
   }
+
   .mobileBrand {
     display: none;
   }
