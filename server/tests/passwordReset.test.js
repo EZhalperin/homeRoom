@@ -26,8 +26,10 @@ const mockUserRepo = {
 const mockEmailService = {
   sendInviteEmail: jest.fn(),
   sendResetEmail: jest.fn(),
+  sendWelcomeCredentialsEmail: jest.fn(),
   sendEmail: jest.fn(),
   buildResetUrl: jest.fn((token) => `http://localhost:5173/reset-password?token=${token}`),
+  buildLoginUrl: jest.fn(() => `http://localhost:5173/login`),
 };
 
 jest.unstable_mockModule("../src/repositories/passwordTokenRepository.js", () => mockPasswordTokenRepo);
@@ -251,6 +253,7 @@ describe("Password Reset & Setup by Email", () => {
       }));
       mockPasswordTokenRepo.createToken.mockResolvedValue({});
       mockEmailService.sendInviteEmail.mockResolvedValue({});
+      mockEmailService.sendWelcomeCredentialsEmail.mockResolvedValue({});
 
       const result = await userService.registerUser({
         userId: "987654321",
@@ -284,6 +287,7 @@ describe("Password Reset & Setup by Email", () => {
         passwordSet: payload.passwordSet,
       }));
       mockEmailService.sendInviteEmail.mockResolvedValue({});
+      mockEmailService.sendWelcomeCredentialsEmail.mockResolvedValue({});
 
       const result = await userService.registerUser({
         userId: "111222333",
@@ -300,8 +304,10 @@ describe("Password Reset & Setup by Email", () => {
         }),
       );
       expect(mockEmailService.sendInviteEmail).not.toHaveBeenCalled();
+      expect(mockEmailService.sendWelcomeCredentialsEmail).toHaveBeenCalledTimes(1);
       expect(result.passwordSet).toBe(true);
       expect(result.inviteSent).toBe(false);
+      expect(result.welcomeSent).toBe(true);
     });
   });
 

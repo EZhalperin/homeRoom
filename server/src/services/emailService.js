@@ -3,6 +3,7 @@ import { env } from "../config/env.js";
 import { logger } from "../utils/logger.js";
 import { inviteEmail } from "../emails/inviteEmail.js";
 import { resetEmail } from "../emails/resetEmail.js";
+import { welcomeEmail } from "../emails/welcomeEmail.js";
 
 let transport = null;
 let isEthereal = false;
@@ -62,6 +63,11 @@ export function buildResetUrl(token) {
   return `${baseUrl}/reset-password?token=${encodeURIComponent(token)}`;
 }
 
+export function buildLoginUrl() {
+  const baseUrl = (env.APP_BASE_URL || "http://localhost:5173").replace(/\/+$/, "");
+  return `${baseUrl}/login`;
+}
+
 export async function sendEmail({ to, subject, html, text }) {
   const transporter = await getTransport();
   const mailOptions = {
@@ -93,5 +99,11 @@ export async function sendInviteEmail({ email, firstName, token }) {
 export async function sendResetEmail({ email, firstName, token }) {
   const resetUrl = buildResetUrl(token);
   const { subject, html, text } = resetEmail({ firstName, resetUrl });
+  return sendEmail({ to: email, subject, html, text });
+}
+
+export async function sendWelcomeCredentialsEmail({ email, firstName, userId, password }) {
+  const loginUrl = buildLoginUrl();
+  const { subject, html, text } = welcomeEmail({ firstName, userId, password, loginUrl });
   return sendEmail({ to: email, subject, html, text });
 }

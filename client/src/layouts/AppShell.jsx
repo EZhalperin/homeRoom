@@ -53,7 +53,7 @@ export default function AppShell({ nav, bottomNav = false }) {
             </button>
           )}
           <div className={styles.brand}>
-            <GraduationCap size={22} className={styles.brandIcon} />
+            <img src="/logo.png" alt="לוגו בית הספר" className={styles.brandLogo} />
             <span className={styles.brandText}>HomeRoom</span>
           </div>
         </div>

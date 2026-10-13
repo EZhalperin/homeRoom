@@ -134,3 +134,18 @@ export async function countUserStats() {
     suspended: suspendedRes.count || 0,
   };
 }
+
+export async function countAudienceStats() {
+  const [parentRes, studentRes] = await Promise.all([
+    supabase.from(TABLE).select("*", { count: "exact", head: true }).eq("role", "parent"),
+    supabase.from(TABLE).select("*", { count: "exact", head: true }).eq("role", "student"),
+  ]);
+
+  if (parentRes.error) throwIfSupabaseError(parentRes.error);
+  if (studentRes.error) throwIfSupabaseError(studentRes.error);
+
+  return {
+    parentsCount: parentRes.count || 0,
+    studentsCount: studentRes.count || 0,
+  };
+}

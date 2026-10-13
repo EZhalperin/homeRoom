@@ -37,6 +37,8 @@ function UserForm({ user, onDone }) {
             toast.success("המשתמש נוצר וההזמנה נשלחה במייל בהצלחה");
           } else if (data?.inviteSent === false && !f.password) {
             toast.error("המשתמש נוצר, אך שליחת ההזמנה במייל נכשלה");
+          } else if (data?.welcomeSent === true) {
+            toast.success("המשתמש נוצר ומייל עם פרטי ההתחברות נשלח בהצלחה");
           } else {
             toast.success("המשתמש נוצר בהצלחה");
           }

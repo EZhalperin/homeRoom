@@ -45,12 +45,27 @@ export async function registerUser({ userId, email, password, role, firstName, l
       ...publicUser,
       inviteSent,
     };
-  }
+  } else {
+    let welcomeSent = false;
+    try {
+      await emailService.sendWelcomeCredentialsEmail({
+        email: created.email,
+        firstName: created.firstName,
+        userId: created.userId,
+        password,
+      });
+      welcomeSent = true;
+    } catch (err) {
+      logger.error(`Failed to send welcome credentials email to ${created.email}:`, err);
+      welcomeSent = false;
+    }
 
-  return {
-    ...publicUser,
-    inviteSent: false,
-  };
+    return {
+      ...publicUser,
+      inviteSent: false,
+      welcomeSent,
+    };
+  }
 }
 
 export async function sendInvite(id) {
